@@ -1,0 +1,11 @@
+{% if item_list %}
+    <ul>
+    {% for item in item_list %}
+        <li>{{ item.name }}</li>
+        <p>Expires {{ item.exp_date }}</p>
+        <p>{{ item.description }}</p>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>There are no items in the fridge.</p>
+{% endif %}
