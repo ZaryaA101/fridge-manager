@@ -1,5 +1,9 @@
 {% extends 'main.html' %} {% block content %}
 <span>Hello, {{request.user}}</span>
 <span><a href="{% url 'logout' %}">Logout</a></span>
+<button type="button" class="btn btn-primary">Add Item</button>
+<button type="button" class="btn btn-secondary">Add member</button>
+<button type="button" class="btn btn-success">Create Family</button>
+<button type="button" class="btn btn-danger">Remove Member</button>
 
 {% endblock content %}
