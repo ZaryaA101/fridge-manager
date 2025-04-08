@@ -8,22 +8,11 @@ import uuid
 
 
 # Create your models here.
-class Item(models.Model):
-    name = models.CharField(max_length=30)
-    exp_date = models.DateField("Expiration date")
-    description = models.CharField(max_length=200)
-
-    def will_expire_soon(self):
-        return self.exp_date >= timezone.now() - datetime.timedelta(days=4)
-
-    def __str__(self):
-        return self.name
-
-
 class ItemsDetails(models.Model):
     item_name = models.CharField(max_length=200)
     #item_image =
     item_description = models.TextField(null=True, blank=True) 
+    item_expdate = models.DateField("Expiration date", default=timezone.now() + datetime.timedelta(days=7))
     created = models.DateTimeField(auto_now_add=True)
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     
@@ -31,6 +20,9 @@ class ItemsDetails(models.Model):
         verbose_name = "Item Detail"
         verbose_name_plural = "Item Details"
 
+    def will_expire_soon(self):
+        return self.exp_date >= timezone.now() - datetime.timedelta(days=4)
+    
     def __str__(self):
         return self.item_name    
     

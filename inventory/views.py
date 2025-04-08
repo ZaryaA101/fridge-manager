@@ -8,17 +8,9 @@ from .forms import CreateUserForm
 
 from .decorators import unauthenticated_user
 
-from .models import Item
+from .models import ItemsDetails
 
 # Create your views here.
-def index(request):
-    item_list = Item.objects.all()
-    context = {
-        "item_list": item_list,
-    }
-    return render(request, "inventory/index.html", context)
-
-
 @unauthenticated_user
 def loginPage(request):    
     if request.method == "POST":
@@ -60,7 +52,10 @@ def heroPage(request):
 
 @login_required(login_url='heroPage')
 def home(request):
-    context={}
+    item_list = ItemsDetails.objects.all()
+    context = {
+        "item_list": item_list,
+    }
     return render(request, "home.html", context=context)
   
 
