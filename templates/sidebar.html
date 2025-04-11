@@ -1,0 +1,59 @@
+<div
+  class="d-flex d-flex align-items-center flex-column flex-shrink-0 bg-light vh-100"
+  style="width: 100%"
+>
+<a
+  href="{% url 'home' %}"
+  class="d-flex flex-column align-items-center justify-content-center mt-5 mb-3 link-dark text-decoration-none text-center"
+>
+  <span class="fs-4 fw-bold">KC</span>
+  <span class="fs-4 fw-bold">Fridge</span>
+  <span class="fs-4 fw-bold">Manager</span>
+</a>
+  <hr />
+  <div class="mb-4">
+    <button class="btn btn-outline-primary btn-lg" type="button">
+        <i class="bi bi-plus-circle me-2"></i>
+        Add Item
+    </button>
+  </div>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li class="nav-item">
+      <a href="#" class="nav-link active" aria-current="page">
+        <i class="bi bi-house-door me-2"></i>
+        </svg>
+        Home
+      </a>
+    </li>
+    <li>
+      <a href="#" class="nav-link link-dark">
+        <i class="bi bi-people me-2"></i>
+        Members
+      </a>
+    </li>
+    <li>
+      <a href="#" class="nav-link link-dark">
+        <i class="bi bi-bell me-2"></i>
+        Notifications
+      </a>
+    </li>
+  </ul>
+  <hr />
+  <div class="dropdown pb-5">
+    <a
+      href="#"
+      class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle"
+      id="dropdownUser2"
+      data-bs-toggle="dropdown"
+      aria-expanded="false"
+    >
+    <i class="bi bi-person-circle me-2" style="font-size: 1.5rem;"></i>
+      <strong>{{request.user}}</strong>
+    </a>
+    <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
+      <li><a class="dropdown-item" href="#">Profile</a></li>
+      <li><hr class="dropdown-divider" /></li>
+      <li><a class="dropdown-item" href="{% url 'logout' %}">Sign out</a></li>
+    </ul>
+  </div>
+</div>

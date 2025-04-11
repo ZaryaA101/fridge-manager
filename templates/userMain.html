@@ -1,0 +1,30 @@
+{% extends 'main.html' %} {% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <!-- Toggle Button for Sidebar -->
+    <button
+      class="btn d-md-none btn btn-outline-primary"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#sidebarMenu"
+      aria-controls="sidebarMenu"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      Toggle Sidebar
+    </button>
+    <!-- Sidebar -->
+    <nav
+      class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse"
+      id="sidebarMenu"
+    >
+      <div class="position-sticky">{% include 'sidebar.html' %}</div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 p-md-4">
+      {% block loggedInContent %}{% endblock loggedInContent %}
+    </main>
+  </div>
+</div>
+{% endblock content %}

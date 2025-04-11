@@ -1,24 +1,18 @@
-{% extends 'main.html' %} {% block content %}
-<div class="fs-3">Hello, {{request.user}}.</div>
+{% extends 'userMain.html' %} {% block loggedInContent %}
+<div class="pd-4">
+  <div class="fs-2">Family Fridge for {{request.user}}.</div>
 
-{% if item_list %}
-    <div class="fs-3"> Your fridge's contents include:</div>
-    <ul>
+  {% if item_list %}
+  <div class="fs-2">Your fridge's contents include:</div>
+  <ul>
     {% for item in item_list %}
-        <li class="fs-4">{{ item.item_name }}</li>
-        <p class="fs-5 text-secondary">Expires {{ item.item_expdate }}</p>
-        <p class="fs-5 text-secondary">{{ item.item_description }}</p>
+    <li class="fs-4">{{ item.item_name }}</li>
+    <p class="fs-5 text-secondary">Expires {{ item.item_expdate }}</p>
+    <p class="fs-5 text-secondary">{{ item.item_description }}</p>
     {% endfor %}
-    </ul>
-{% else %}
-    <p>There are no items in the fridge.</p>
-{% endif %}
-
-
-<button type="button" class="btn btn-primary">Add Item</button>
-<button type="button" class="btn btn-secondary">Add member</button>
-<button type="button" class="btn btn-success">Create Family</button>
-<button type="button" class="btn btn-danger">Remove Member</button>
-
-<div><a href="{% url 'logout' %}">Logout</a></div>
-{% endblock content %}
+  </ul>
+  {% else %}
+  <p>There are no items in the fridge.</p>
+  {% endif %}
+</div>
+{% endblock loggedInContent %}
