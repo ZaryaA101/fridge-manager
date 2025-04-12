@@ -2,10 +2,9 @@
 
 <style>
   .Shelf {
-      font-weight: bold;
       padding: 5px;
-      margin-top: 15px;
-      margin-bottom: 15px;
+      margin-top: 10px;
+      margin-bottom: 10px;
       font-size: 25px;
   }
 </style>
@@ -13,10 +12,12 @@
 <style>
   .Item {
       width: 70px;
-      margin: 10px;
+      margin: 5px;
+      text-align: center;
+      display: inline-block;
+      font-weight: 200;
   }
 </style>
-
 
 <div class="pd-4">
   <div class="fs-2">Family Fridge for {{request.user}}.</div>
@@ -28,8 +29,8 @@
 
       {% if item.item_type == "Left Shelves" %}
       <span class="Item">
-        <img style="float: top;" src="{{ item.item_image.url }}" width="50" height="50">
-        {{ item.item_name }}
+      <img src="{{ item.item_image.url }}" width="50" height="50">
+      {{ item.item_name }}
       </span>
       {% endif %}
 
@@ -41,7 +42,7 @@
 
       {% if item.item_type == "Middle Shelves" %}
       <span class="Item">
-        <img style="float: top;" src="{{ item.item_image.url }}" width="50" height="50">
+        <img src="{{ item.item_image.url }}" width="50" height="50">
         {{ item.item_name }}
       </span>
       {% endif %}
@@ -54,7 +55,7 @@
           
       {% if item.item_type == "Right Shelves" %}
       <span class="Item">
-        <img style="float: top;" src="{{ item.item_image.url }}" width="50" height="50">
+        <img src="{{ item.item_image.url }}" width="50" height="50">
         {{ item.item_name }}
       </span>
       {% endif %}
@@ -67,7 +68,7 @@
       
       {% if item.item_type == "Freezer" %}
       <span class="Item">
-        <img style="float: top;" src="{{ item.item_image.url }}" width="50" height="50">
+        <img src="{{ item.item_image.url }}" width="50" height="50">
         {{ item.item_name }}
       </span>
       {% endif %}
@@ -80,7 +81,7 @@
 
       {% if item.item_type == "Produce" %}
       <span class="Item">
-        <img style="float: top;" src="{{ item.item_image.url }}" width="50" height="50">
+        <img src="{{ item.item_image.url }}" width="50" height="50">
         {{ item.item_name }}
       </span>
       {% endif %}
