@@ -1,18 +1,95 @@
 {% extends 'userMain.html' %} {% block loggedInContent %}
+
+<style>
+  .Shelf {
+      font-weight: bold;
+      padding: 5px;
+      margin-top: 15px;
+      margin-bottom: 15px;
+      font-size: 25px;
+  }
+</style>
+  
+<style>
+  .Item {
+      width: 70px;
+      margin: 10px;
+  }
+</style>
+
+
 <div class="pd-4">
   <div class="fs-2">Family Fridge for {{request.user}}.</div>
 
   {% if item_list %}
-  <div class="fs-2">Your fridge's contents include:</div>
-  <ul>
+
+    <div class="Shelf">Left Shelves</div>
     {% for item in item_list %}
-    <li class="fs-4">{{ item.item_name }}</li>
-    <p class="fs-5 text-secondary">Expires {{ item.item_expdate }}</p>
-    <p class="fs-5 text-secondary">{{ item.item_description }}</p>
+
+      {% if item.item_type == "Left Shelves" %}
+      <span class="Item">
+        <img style="float: top;" src="{{ item.item_image.url }}" width="50" height="50">
+        {{ item.item_name }}
+      </span>
+      {% endif %}
+
     {% endfor %}
-  </ul>
+
+
+    <div class="Shelf">Middle Shelves</div>
+    {% for item in item_list %}
+
+      {% if item.item_type == "Middle Shelves" %}
+      <span class="Item">
+        <img style="float: top;" src="{{ item.item_image.url }}" width="50" height="50">
+        {{ item.item_name }}
+      </span>
+      {% endif %}
+
+    {% endfor %}
+
+
+    <div class="Shelf">Right Shelves</div>
+    {% for item in item_list %}
+          
+      {% if item.item_type == "Right Shelves" %}
+      <span class="Item">
+        <img style="float: top;" src="{{ item.item_image.url }}" width="50" height="50">
+        {{ item.item_name }}
+      </span>
+      {% endif %}
+          
+    {% endfor %}
+
+
+    <div class="Shelf">Freezer</div>
+    {% for item in item_list %}
+      
+      {% if item.item_type == "Freezer" %}
+      <span class="Item">
+        <img style="float: top;" src="{{ item.item_image.url }}" width="50" height="50">
+        {{ item.item_name }}
+      </span>
+      {% endif %}
+      
+    {% endfor %}
+
+    <div class="Shelf">Produce</div>
+    <div style="margin-bottom: 5px;">
+    {% for item in item_list %}
+
+      {% if item.item_type == "Produce" %}
+      <span class="Item">
+        <img style="float: top;" src="{{ item.item_image.url }}" width="50" height="50">
+        {{ item.item_name }}
+      </span>
+      {% endif %}
+
+    {% endfor %}
+
   {% else %}
-  <p>There are no items in the fridge.</p>
+    <p class="fs-5">There are no items in the fridge.</p>
   {% endif %}
+
 </div>
 {% endblock loggedInContent %}

@@ -11,13 +11,13 @@ import uuid
 class ItemsDetails(models.Model):
     item_id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     item_name = models.CharField(max_length=200)
-    #item_image =
+    item_image = models.ImageField(blank=True)
     item_description = models.TextField(null=True, blank=True) 
+    item_type = models.CharField(max_length=30, null=True)
     created = models.DateTimeField(auto_now_add=True)
     dimension_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     dimension_width = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     dimension_height = models.DecimalField(default=1, max_digits=5, decimal_places=2)
-    
     
     class Meta:
         verbose_name = "Item Detail"
