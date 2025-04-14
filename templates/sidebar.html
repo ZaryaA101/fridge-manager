@@ -12,7 +12,7 @@
 </a>
   <hr />
   <div class="mb-4">
-    <button class="btn btn-outline-primary btn-lg" type="button">
+    <button id="addItemButton" class="btn btn-outline-primary btn-lg" type="button">
         <i class="bi bi-plus-circle me-2"></i>
         Add Item
     </button>
@@ -56,4 +56,9 @@
       <li><a class="dropdown-item" href="{% url 'logout' %}">Sign out</a></li>
     </ul>
   </div>
+  <script>
+    document.getElementById("addItemButton").addEventListener("click", function () {
+      window.location.href = "{% url 'add_item' %}";
+    });
+  </script>
 </div>
