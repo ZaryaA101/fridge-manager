@@ -1,95 +1,12 @@
 {% extends 'userMain.html' %} {% block loggedInContent %}
 
-<style>
-  .Shelf {
-      padding: 5px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      font-size: 25px;
-  }
-</style>
-  
-<style>
-  .Item {
-      width: 70px;
-      margin: 5px;
-      text-align: center;
-      display: inline-block;
-      font-weight: 200;
-  }
-</style>
-
 <div class="pd-4">
-  <div class="fs-2">Family Fridge for {{request.user}}.</div>
+  <div class="fs-2">Hello {{request.user}}.</div>
 
-  {% if item_list %}
-
-    <div class="Shelf">Left Shelves</div>
-    {% for item in item_list %}
-
-      {% if item.item_type == "Left Shelves" %}
-      <span class="Item">
-      <img src="{{ item.item_image.url }}" width="50" height="50">
-      {{ item.item_name }}
-      </span>
-      {% endif %}
-
-    {% endfor %}
-
-
-    <div class="Shelf">Middle Shelves</div>
-    {% for item in item_list %}
-
-      {% if item.item_type == "Middle Shelves" %}
-      <span class="Item">
-        <img src="{{ item.item_image.url }}" width="50" height="50">
-        {{ item.item_name }}
-      </span>
-      {% endif %}
-
-    {% endfor %}
-
-
-    <div class="Shelf">Right Shelves</div>
-    {% for item in item_list %}
-          
-      {% if item.item_type == "Right Shelves" %}
-      <span class="Item">
-        <img src="{{ item.item_image.url }}" width="50" height="50">
-        {{ item.item_name }}
-      </span>
-      {% endif %}
-          
-    {% endfor %}
-
-
-    <div class="Shelf">Freezer</div>
-    {% for item in item_list %}
-      
-      {% if item.item_type == "Freezer" %}
-      <span class="Item">
-        <img src="{{ item.item_image.url }}" width="50" height="50">
-        {{ item.item_name }}
-      </span>
-      {% endif %}
-      
-    {% endfor %}
-
-    <div class="Shelf">Produce</div>
-    <div style="margin-bottom: 5px;">
-    {% for item in item_list %}
-
-      {% if item.item_type == "Produce" %}
-      <span class="Item">
-        <img src="{{ item.item_image.url }}" width="50" height="50">
-        {{ item.item_name }}
-      </span>
-      {% endif %}
-
-    {% endfor %}
-
+  {% if fridge_list %}
+    <a href="fridgePage">>go to fridgePage</p>
   {% else %}
-    <p class="fs-5">There are no items in the fridge.</p>
+    <p class="fs-5">You currently don't have any fridges. Please add a fridge.</p>
   {% endif %}
 
 </div>

@@ -21,7 +21,7 @@ def loginPage(request):
         
         if user is not None:
             login(request, user=user)
-            return redirect('home')
+            return redirect('fridgePage')
         else:
             messages.info(request, "Username or password is incorrect.")
             return render(request, 'loginPage.html') 
@@ -51,11 +51,18 @@ def heroPage(request):
     return render(request, 'heroPage.html', context = context)
 
 @login_required(login_url='heroPage')
-def home(request):
-    item_list = ItemsDetails.objects.all()
+def fridgePage(request):
+    item_list = ItemsDetails.objects.order_by("item_type")
+
     context = {
         "item_list": item_list,
     }
-    return render(request, "home.html", context=context)
+    return render(request, "fridgePage.html", context=context)
   
-
+@login_required(login_url='heroPage')
+def home(request):
+    fridge_list = 1
+    context = {
+        "fridge_list": fridge_list,
+    }
+    return render(request, "home.html", context=context)
