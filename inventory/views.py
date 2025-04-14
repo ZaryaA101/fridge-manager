@@ -9,6 +9,8 @@ from .forms import CreateUserForm
 from .decorators import unauthenticated_user
 
 from .models import ItemsDetails
+from . import models
+from django.contrib.auth.models import User 
 
 # Create your views here.
 @unauthenticated_user
@@ -52,17 +54,31 @@ def heroPage(request):
 
 @login_required(login_url='heroPage')
 def fridgePage(request):
-    item_list = ItemsDetails.objects.order_by("item_type")
+    # item_list = ItemsDetails.objects.order_by("item_type")
 
-    context = {
-        "item_list": item_list,
-    }
-    return render(request, "fridgePage.html", context=context)
+    # context = {
+    #     "item_list": item_list,
+    # }
+    return render(request, "fridgePage.html")
   
 @login_required(login_url='heroPage')
 def home(request):
-    fridge_list = 1
+    families = models.Family.objects.filter(familytag__user=request.user)
+    fridge_details = models.FridgeDetail.objects.filter(family_id__in=families)
+    family_users = models.FamilyTag.objects.filter(family_id__in=families)
+    print(family_users)
+    context = {
+        "family_users": family_users,
+        "families": families,
+        
+    }
+    return render(request, "home.html", context=context)
+
+
+@login_required(login_url='heroPage')
+def addFridge(request):
+    fridge_list=1
     context = {
         "fridge_list": fridge_list,
     }
-    return render(request, "home.html", context=context)
+    return render(request, "addFridge.html", context=context)

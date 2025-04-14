@@ -48,19 +48,6 @@ class Family(models.Model):
 
     def __str__(self):
         return f"{self.family_name}"
-    
-    
-class FamilyTag(models.Model):
-    family = models.ForeignKey(Family, on_delete=models.CASCADE, null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    
-    class Meta:
-        verbose_name = "Family Member"
-        verbose_name_plural = "Family Members"
-        unique_together = ("family", "user")
-    
-    def __str__(self):
-        return f"{self.family} : {self.user} "
 
 
 class FridgeDetail(models.Model):
@@ -74,6 +61,26 @@ class FridgeDetail(models.Model):
     def __str__(self):
         return f"{self.family_id.family_name}'s Fridge details"
     
+
+
+class FamilyTag(models.Model):
+    family = models.ForeignKey(Family, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    
+    class Meta:
+        verbose_name = "Family Member"
+        verbose_name_plural = "Family Members"
+        unique_together = ("family", "user")
+        
+    @staticmethod
+    def get_all_families_by_user(user):
+        return Family.objects.filter(familytag__user=user)
+        
+    
+    def __str__(self):
+        return f"{self.family} : {self.user} "
+
+
 
 # Fridge Content Model
 class FridgeContent(models.Model):
