@@ -9,11 +9,18 @@ import uuid
 
 # Create your models here.
 class ItemsDetails(models.Model):
+    Item_Type_Choices = [
+        ('Produce', 'Produce'),
+        ('Freezer', 'Freezer'),
+        ('Left Shelves', 'Left Shelves'),
+        ('Middle Shelves', 'Middle Shelves'),
+        ('Right Shelves', 'Right Shelves'),
+    ]
     item_id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     item_name = models.CharField(max_length=200)
     item_image = models.ImageField(blank=True)
     item_description = models.TextField(null=True, blank=True) 
-    item_type = models.CharField(max_length=30, null=True)
+    item_type = models.CharField(max_length=30, choices = Item_Type_Choices, default=True)
     created = models.DateTimeField(auto_now_add=True)
     dimension_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     dimension_width = models.DecimalField(default=1, max_digits=5, decimal_places=2)
