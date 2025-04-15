@@ -54,19 +54,17 @@ def heroPage(request):
 
 @login_required(login_url='heroPage')
 def fridgePage(request):
-    # item_list = ItemsDetails.objects.order_by("item_type")
+    item_list = ItemsDetails.objects.order_by("item_type")
 
-    # context = {
-    #     "item_list": item_list,
-    # }
-    return render(request, "fridgePage.html")
+    context = {
+        "item_list": item_list,
+    }
+    return render(request, "fridgePage.html", context)
   
 @login_required(login_url='heroPage')
 def home(request):
     families = models.Family.objects.filter(familytag__user=request.user)
-    fridge_details = models.FridgeDetail.objects.filter(family_id__in=families)
     family_users = models.FamilyTag.objects.filter(family_id__in=families)
-    print(family_users)
     context = {
         "family_users": family_users,
         "families": families,
