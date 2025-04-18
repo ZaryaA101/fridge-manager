@@ -1,10 +1,12 @@
 import datetime
+from decimal import Decimal
+import uuid
 
 from django.db import models
 from django.utils import timezone
 
+
 from django.contrib.auth.models import User 
-import uuid
 
 
 # Create your models here.
@@ -40,6 +42,9 @@ class ItemsDetails(models.Model):
 class Family(models.Model):
     family_id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     family_name = models.CharField(max_length=200)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    
+    
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -48,6 +53,30 @@ class Family(models.Model):
 
     def __str__(self):
         return f"{self.family_name}"
+    
+    @property
+    def total_volume(self):
+        """
+        Calculates the total available volume from all compartments in this family's fridge.
+        """
+        total = Decimal("0")
+        # Accessing related compartments via the related_name "FridgeDetails"
+        for compartment in self.FridgeDetails.all():
+            comp_vol = compartment.compartment_length * compartment.compartment_width * compartment.compartment_height
+            total += comp_vol
+        return total
+
+    @property
+    def occupied_volume(self):
+        """
+        Calculates the total volume occupied by items in the family's fridge.
+        """
+        occupied = Decimal("0")
+        # Accessing related fridge contents via the related_name "fridge_contents"
+        for content in self.fridge_contents.all():
+            item_vol = content.item_length * content.item_width * content.item_height * content.quantity
+            occupied += item_vol
+        return occupied
 
 
 class FridgeDetail(models.Model):
@@ -66,6 +95,7 @@ class FridgeDetail(models.Model):
 class FamilyTag(models.Model):
     family = models.ForeignKey(Family, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    limit_ratio = models.DecimalField(max_digits=3, decimal_places=2, default=0.30)
     
     class Meta:
         verbose_name = "Family Member"

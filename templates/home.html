@@ -16,7 +16,9 @@
         <a href="#" class="list-group-item list-group-item-action" aria-current="true">
           <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">{{ family }}</h5>
-            <small>3 days ago</small>
+            <small>
+              {{ family.occupied_volume|floatformat:2 }} / {{ family.total_volume|floatformat:2 }}
+            </small>
           </div>
           <p>
             Members: 
@@ -36,10 +38,12 @@
     <div class="fs-2">You don't have a fridge. Please add a fridge.</div>
   {% endif %}
 
-  
 
-  <button type="button" class="btn  btn-lg btn-outline-primary">+ Add Fridge</button>
-
+  <button type="button" 
+    class="btn  btn-lg btn-outline-primary" 
+    onclick="window.location.href={% url 'createFamily' %};">
+      + Add Fridge
+  </button>
 
   <button
     type="button"

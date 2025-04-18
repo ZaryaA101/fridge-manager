@@ -1,0 +1,26 @@
+{% extends 'userMain.html' %} {% block loggedInContent %}
+
+<body>
+    <h1>Create Family</h1>
+    {% if error %}
+      <p style="color:red;">{{ error }}</p>
+    {% endif %}
+    <form action="{% url 'createFamily' %}" method="post">
+        {% csrf_token %}
+        <div>
+            <label for="id_family_name">Family Name:</label>
+            <input type="text" id="id_family_name" name="family_name" required>
+        </div>
+        <div>
+            <label for="id_owner">Owner:</label>
+            <select id="id_owner" name="owner">
+                <option value="">-- Default to me --</option>
+            </select>
+        </div>
+        <button type="submit">Create Family</button>
+    </form>
+</body>
+
+
+
+{% endblock loggedInContent %}

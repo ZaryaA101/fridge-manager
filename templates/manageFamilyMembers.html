@@ -1,0 +1,59 @@
+{% extends 'userMain.html' %}
+{% block loggedInContent %}
+
+<h1>Manage Members for Family: {{ family.family_name }}</h1>
+
+<!-- Section: Display current family members -->
+<h2>Current Members</h2>
+{% if current_members %}
+  <ul>
+    {% for tag in current_members %}
+      <li>
+        {{ tag.user.username }}
+        {% if tag.user == family.owner %}
+          (Owner)
+        {% else %}
+          - Current Ratio: {{ tag.limit_ratio }}
+          <!-- Form to update the member's ratio -->
+          <form action="{% url 'manageFamilyMembers' family.family_id %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <!-- Pass the member's id in a hidden field -->
+            <input type="hidden" name="member_id" value="{{ tag.user.id }}">
+            <!-- New ratio input (0 to 1, in steps of 0.01) -->
+            <input type="number" name="new_ratio" step="0.01" min="0" max="1" value="{{ tag.limit_ratio }}" required>
+            <button type="submit" name="update_ratio">Update Ratio</button>
+          </form>
+          <!-- Form to remove the member -->
+          <form action="{% url 'manageFamilyMembers' family.family_id %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" name="remove_member" value="{{ tag.user.id }}">Remove</button>
+          </form>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No members added yet.</p>
+{% endif %}
+
+<!-- Section: Add a new member -->
+<h2>Add a New Member</h2>
+<form action="{% url 'manageFamilyMembers' family.family_id %}" method="post">
+    {% csrf_token %}
+    <div>
+        <label for="id_member_id">Select Member:</label>
+        <select id="id_member_id" name="member_id" required>
+            <option value="">-- Choose User --</option>
+            {% for user in available_users %}
+                <option value="{{ user.id }}">{{ user.username }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="id_limit_ratio">Set Limit Ratio (0-1):</label>
+        <input type="number" id="id_limit_ratio" name="limit_ratio" step="0.01" min="0" max="1" value="0.30" required>
+    </div>
+    <button type="submit" name="add_member">Add Member</button>
+</form>
+
+{% endblock loggedInContent %}

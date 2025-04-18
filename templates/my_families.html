@@ -1,0 +1,44 @@
+{% extends 'userMain.html' %}
+{% block loggedInContent %}
+
+<h1>My Families</h1>
+
+{% if families %}
+    <ul>
+      {% for family in families %}
+        <li>
+          <h2>{{ family.family_name }}</h2>
+          <p>Owner: {{ family.owner.username }}</p>
+          <p>Created: {{ family.created|date:"F j, Y, g:i a" }}</p>
+          <!-- Display Fridge Details for the Family -->
+          <h3>Fridge Details:</h3>
+          {% if family.FridgeDetails.all %}
+            <ul>
+              {% for fridge in family.FridgeDetails.all %}
+                <li>
+                  <strong>Compartment:</strong> {{ fridge.compartment_name }}<br>
+                  <strong>Dimensions:</strong> {{ fridge.compartment_length }} x {{ fridge.compartment_width }} x {{ fridge.compartment_height }}<br>
+                  <strong>Added Date:</strong> {{ fridge.added_date|date:"F j, Y" }}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p>No fridge details available.</p>
+          {% endif %}
+
+          {% if family.owner == request.user %}
+          <a href="{% url 'manageFamilyMembers' family.family_id %}">Manage Members</a>
+          <a href="{% url 'manage_fridge_details' family.family_id %}">Manage Compartments</a>
+
+          {% endif %}
+
+          
+
+        </li>
+      {% endfor %}
+    </ul>
+{% else %}
+    <p>You are not a member of any families yet.</p>
+{% endif %}
+
+{% endblock loggedInContent %}

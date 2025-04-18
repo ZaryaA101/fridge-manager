@@ -1,9 +1,8 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-
 from .forms import CreateUserForm, ProfileForm
 
 from .decorators import unauthenticated_user
@@ -52,6 +51,7 @@ def heroPage(request):
     
     return render(request, 'heroPage.html', context = context)
 
+
 @login_required(login_url='heroPage')
 def fridgePage(request):
     item_list = ItemsDetails.objects.order_by("item_type")
@@ -60,6 +60,7 @@ def fridgePage(request):
         "item_list": item_list,
     }
     return render(request, "fridgePage.html", context)
+  
   
 @login_required(login_url='heroPage')
 def home(request):
@@ -72,6 +73,7 @@ def home(request):
     }
     return render(request, "home.html", context=context)
 
+
 @login_required(login_url='heroPage')
 def addFridge(request):
     fridge_list=1
@@ -82,7 +84,6 @@ def addFridge(request):
 
 @login_required(login_url='heroPage')
 def profilePage(request):
-
     if request.method == "POST":
         form = ProfileForm(request.POST)
         if form.is_valid():
@@ -97,3 +98,172 @@ def profilePage(request):
     }
 
     return render(request, 'profilePage.html', context)
+
+
+@login_required(login_url='heroPage')
+def createFamily(request):
+    if request.method == 'POST':
+        family_name = request.POST.get('family_name', '').strip()
+ 
+        # Owner default to logged in user
+        owner_id = request.POST.get('owner')
+        if owner_id:
+            owner = get_object_or_404(User, pk=owner_id)
+        else:
+            owner = request.user
+
+        if not family_name:
+            context = {
+                'error': 'Family name is required.',
+                'users': User.objects.all()
+            }
+            return render(request, 'createFamily.html', context)
+        
+         # Check if a Family with this name already exists.
+        if models.Family.objects.filter(family_name__iexact=family_name).exists():
+            context = {
+                'error': 'A family with that name already exists.',
+                'users': User.objects.all()
+            }
+            return render(request, 'createFamily.html', context)
+
+        # Create the new Family instance
+        new_family = models.Family.objects.create(
+            family_name=family_name,
+            owner=owner
+        )
+        
+        # Add the current user as a family member using FamilyTag.
+        models.FamilyTag.objects.create(
+            family=new_family,
+            user=request.user
+        )
+
+        return redirect('home')
+    
+    context = {}
+    return render(request, 'createFamily.html', context)
+
+
+
+@login_required(login_url='heroPage')
+def manageFamilyMembers(request, family_id):
+    family = get_object_or_404(models.Family, family_id=family_id)
+    
+    # Only allow the family owner to manage members.
+    if family.owner != request.user:
+        return HttpResponseForbidden("You do not have permission to manage this family.")
+    
+    if request.method == "POST":
+        # Adding a member
+        if "add_member" in request.POST:
+            member_id = request.POST.get("member_id")
+            limit_ratio = request.POST.get("limit_ratio", "0.30")  
+            if member_id:
+                if not models.FamilyTag.objects.filter(family=family, user__id=member_id).exists():
+                    member = get_object_or_404(User, id=member_id)
+                    models.FamilyTag.objects.create(family=family, user=member, limit_ratio=limit_ratio)
+                    
+        # Removing a member
+        elif "remove_member" in request.POST:
+            remove_id = request.POST.get("remove_member")
+            if remove_id:
+                # Prevent removing the owner.
+                if str(family.owner.id) == remove_id:
+                    pass
+                else:
+                    models.FamilyTag.objects.filter(family=family, user__id=remove_id).delete()
+        # Updating a member's limit ratio
+        elif "update_ratio" in request.POST:
+            member_id = request.POST.get("member_id")
+            new_ratio = request.POST.get("new_ratio")
+            if member_id and new_ratio:
+                tag = models.FamilyTag.objects.filter(family=family, user__id=member_id).first()
+                if tag:
+                    tag.limit_ratio = new_ratio
+                    tag.save()
+                    
+                    
+        # Redirect to the same page after handling POST
+        return redirect("manageFamilyMembers", family_id=family.family_id)
+    
+    #GET REQUEST
+    current_members = list(models.FamilyTag.objects.filter(family=family).select_related('user'))
+    owner_id = family.owner.id
+    #make owner to always in front
+    current_members.sort(key=lambda tag: 0 if tag.user.id == owner_id else 1)
+    current_member_ids = [tag.user.id for tag in current_members if tag.user]
+    
+    available_users = User.objects.exclude(id__in=current_member_ids)
+    default_limit_ratio = 0.30 
+    
+    context = {
+        "family": family,
+        "current_members": current_members,
+        "available_users": available_users,
+        "default_limit_ratio": default_limit_ratio,
+    }
+    return render(request, "manageFamilyMembers.html", context)
+
+
+
+@login_required(login_url='heroPage')
+def my_families(request):
+    # Retrieve all Family instances where the current user is a member using the static method.
+    families = models.FamilyTag.get_all_families_by_user(request.user)
+    
+    context = {
+        'families': families
+    }
+    return render(request, 'my_families.html', context)
+
+
+@login_required(login_url='heroPage')
+def manage_fridge_details(request, family_id):
+    family = get_object_or_404(models.Family, family_id=family_id)
+    
+    # Only allow the owner to manage fridge details.
+    if family.owner != request.user:
+        return HttpResponseForbidden("You do not have permission to manage this family's fridge details.")
+    
+    error = None
+
+    if request.method == 'POST':
+        # Handle adding a new compartment.
+        if "add_compartment" in request.POST:
+            compartment_name = request.POST.get('compartment_name', '').strip()
+            compartment_length = request.POST.get('compartment_length')
+            compartment_width = request.POST.get('compartment_width')
+            compartment_height = request.POST.get('compartment_height')
+            
+            # Validate that the compartment name is provided.
+            if not compartment_name:
+                error = "Compartment name is required."
+            else:
+                # Create the new FridgeDetail record
+                models.FridgeDetail.objects.create(
+                    family_id=family,
+                    compartment_name=compartment_name,
+                    compartment_length=compartment_length,
+                    compartment_width=compartment_width,
+                    compartment_height=compartment_height
+                )
+        
+        # remove compartment
+        elif "remove_compartment" in request.POST:
+            detail_id = request.POST.get("remove_compartment")
+            if detail_id:
+                models.FridgeDetail.objects.filter(id=detail_id, family_id=family).delete()
+        
+        # Redirect to the same management page (to avoid resubmission issues)
+        return redirect('manage_fridge_details', family_id=family.family_id)
+    
+    # For GET requests, fetch the current fridge details.
+    fridge_details = models.FridgeDetail.objects.filter(family_id=family)
+    
+    context = {
+        "family": family,
+        "fridge_details": fridge_details,
+        "error": error
+    }
+    return render(request, "manage_fridge_details.html", context)

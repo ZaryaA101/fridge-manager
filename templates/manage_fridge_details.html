@@ -1,0 +1,58 @@
+{% extends 'userMain.html' %}
+{% block loggedInContent %}
+
+<h1>Manage Fridge Compartments for {{ family.family_name }}</h1>
+
+<!-- Display any error message -->
+{% if error %}
+  <p style="color:red;">{{ error }}</p>
+{% endif %}
+
+<!-- List current fridge compartments -->
+<h2>Current Compartments</h2>
+{% if fridge_details %}
+  <ul>
+    {% for fridge in fridge_details %}
+      <li>
+        <strong>Name:</strong> {{ fridge.compartment_name }}<br>
+        <strong>Dimensions:</strong> 
+          {{ fridge.compartment_length }} x 
+          {{ fridge.compartment_width }} x 
+          {{ fridge.compartment_height }}<br>
+        <form action="{% url 'manage_fridge_details' family.family_id %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" name="remove_compartment" value="{{ fridge.id }}">
+            Remove
+          </button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No compartments added yet.</p>
+{% endif %}
+
+<!-- Form to add a new fridge compartment -->
+<h2>Add a New Compartment</h2>
+<form action="{% url 'manage_fridge_details' family.family_id %}" method="post">
+  {% csrf_token %}
+  <div>
+    <label for="id_compartment_name">Compartment Name:</label>
+    <input type="text" id="id_compartment_name" name="compartment_name" required>
+  </div>
+  <div>
+    <label for="id_compartment_length">Length:</label>
+    <input type="number" step="0.01" id="id_compartment_length" name="compartment_length" value="1" required>
+  </div>
+  <div>
+    <label for="id_compartment_width">Width:</label>
+    <input type="number" step="0.01" id="id_compartment_width" name="compartment_width" value="1" required>
+  </div>
+  <div>
+    <label for="id_compartment_height">Height:</label>
+    <input type="number" step="0.01" id="id_compartment_height" name="compartment_height" value="1" required>
+  </div>
+  <button type="submit" name="add_compartment">Add Compartment</button>
+</form>
+
+{% endblock loggedInContent %}
