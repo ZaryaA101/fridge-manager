@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
-from .forms import CreateUserForm
+from .forms import CreateUserForm, ProfileForm
 
 from .decorators import unauthenticated_user
 
@@ -72,7 +72,6 @@ def home(request):
     }
     return render(request, "home.html", context=context)
 
-
 @login_required(login_url='heroPage')
 def addFridge(request):
     fridge_list=1
@@ -80,3 +79,21 @@ def addFridge(request):
         "fridge_list": fridge_list,
     }
     return render(request, "addFridge.html", context=context)
+
+@login_required(login_url='heroPage')
+def profilePage(request):
+
+    if request.method == "POST":
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = ProfileForm()
+
+    context = {
+        'User': User,
+        'form': form
+    }
+
+    return render(request, 'profilePage.html', context)

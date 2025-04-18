@@ -101,3 +101,13 @@ class FridgeContent(models.Model):
 
     def __str__(self):
         return f"{self.item_id} ({self.quantity}) in {self.family_id.family_name}"
+
+
+class UserProfile(models.Model):
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="user_profile")
+    overall_space = models.DecimalField(default=1, max_digits=2, decimal_places=2)
+    leftdoor_space = models.DecimalField(default=1, max_digits=2, decimal_places=2)
+    rightdoor_space = models.DecimalField(default=1, max_digits=2, decimal_places=2)
+    producebin_space = models.DecimalField(default=1, max_digits=2, decimal_places=2)
+    freezer_space = models.DecimalField(default=1, max_digits=2, decimal_places=2)
