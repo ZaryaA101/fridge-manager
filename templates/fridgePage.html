@@ -44,7 +44,11 @@
 
       {% if item.item_type == "Left Shelves" %}
       <span class="Item">
-      <img src="{{ item.item_image.url }}" width="50" height="50">
+        {% if item.item_image %}
+          <img src="{{ item.item_image.url }}" width="50" height="50">
+        {% else %}
+          <img src="/path/to/default/image.jpg" width="50" height="50">
+        {% endif %}
       {{ item.item_name }}
       </span>
       {% endif %}
@@ -60,7 +64,11 @@
 
       {% if item.item_type == "Middle Shelves" %}
       <span class="Item">
-        <img src="{{ item.item_image.url }}" width="50" height="50">
+        {% if item.item_image %}
+          <img src="{{ item.item_image.url }}" width="50" height="50">
+        {% else %}
+          <img src="/path/to/default/image.jpg" width="50" height="50">
+        {% endif %}
         {{ item.item_name }}
       </span>
       {% endif %}
@@ -76,7 +84,11 @@
           
       {% if item.item_type == "Right Shelves" %}
       <span class="Item">
-        <img src="{{ item.item_image.url }}" width="50" height="50">
+        {% if item.item_image %}
+          <img src="{{ item.item_image.url }}" width="50" height="50">
+        {% else %}
+          <img src="/path/to/default/image.jpg" width="50" height="50">
+        {% endif %}
         {{ item.item_name }}
       </span>
       {% endif %}
@@ -92,7 +104,11 @@
       
       {% if item.item_type == "Freezer" %}
       <span class="Item">
-        <img src="{{ item.item_image.url }}" width="50" height="50">
+        {% if item.item_image %}
+          <img src="{{ item.item_image.url }}" width="50" height="50">
+        {% else %}
+          <img src="/path/to/default/image.jpg" width="50" height="50">
+        {% endif %}
         {{ item.item_name }}
       </span>
       {% endif %}
@@ -108,7 +124,11 @@
 
       {% if item.item_type == "Produce" %}
       <span class="Item">
-        <img src="{{ item.item_image.url }}" width="50" height="50">
+        {% if item.item_image %}
+          <img src="{{ item.item_image.url }}" width="50" height="50">
+        {% else %}
+          <img src="/path/to/default/image.jpg" width="50" height="50">
+        {% endif %}
         {{ item.item_name }}
       </span>
       {% endif %}

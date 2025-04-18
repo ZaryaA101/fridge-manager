@@ -20,7 +20,7 @@ class ItemsDetails(models.Model):
     ]
     item_id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     item_name = models.CharField(max_length=200)
-    item_image = models.ImageField(blank=True)
+    item_image = models.ImageField(upload_to='', default='default.jpeg')
     item_description = models.TextField(null=True, blank=True) 
     item_type = models.CharField(max_length=30, choices = Item_Type_Choices, default=True)
     created = models.DateTimeField(auto_now_add=True)
