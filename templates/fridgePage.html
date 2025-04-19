@@ -1,31 +1,6 @@
 {% extends 'userMain.html' %} {% block loggedInContent %}
 
 
-<!-- fridgePage.html -->
-<h1>{{ family.family_name }}'s Fridge</h1>
-
-<h2>Expiring Items:</h2>
-{% for item in expiring_items %}
-    <div class="alert alert-warning">
-        ⚠️ The item {{ item.item_id.item_name }} is expiring on {{ item.expiration_date }}.
-    </div>
-{% endfor %}
-
-<h2>Fridge Capacity:</h2>
-<div class="progress">
-    <div class="progress-bar bg-info" role="progressbar" style="width: {{ usage_percent }}%;" aria-valuenow="{{ usage_percent }}" aria-valuemin="0" aria-valuemax="100">
-        {{ usage_percent|floatformat:0 }}% Full
-    </div>
-</div>
-
-<h2>Fridge Items:</h2>
-{% for item in fridge_items %}
-    <div>{{ item.item_id.item_name }} - {{ item.quantity }} items</div>
-{% endfor %}
-
-
-
-
 <style>
   .Shelf {
     padding: 5px;
