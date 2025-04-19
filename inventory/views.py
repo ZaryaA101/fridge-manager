@@ -293,3 +293,9 @@ def manage_fridge_details(request, family_id):
         "error": error
     }
     return render(request, "manage_fridge_details.html", context)
+    
+def fridge_view(request):
+    context = {
+        'item_list': ItemsDetails.objects.all(),
+    }
+    return render(request, 'fridgePage.html', context)
