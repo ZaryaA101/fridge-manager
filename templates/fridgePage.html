@@ -1,3 +1,14 @@
+{% for item in expiring_items %}
+  <div class="alert alert-warning">
+    ⚠️ The item <strong>{{ item.item_id.item_name }}</strong> is expiring on {{ item.expiration_date }}.
+  </div>
+{% endfor %}
+<div class="progress">
+  <div class="progress-bar bg-info" role="progressbar" style="width: {{ usage_percent }}%;" aria-valuenow="{{ usage_percent }}" aria-valuemin="0" aria-valuemax="100">
+    {{ usage_percent|floatformat:0 }}% Full
+  </div>
+</div>
+
 {% extends 'userMain.html' %} {% block loggedInContent %}
 
 <style>
