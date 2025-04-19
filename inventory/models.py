@@ -22,6 +22,7 @@ class ItemsDetails(models.Model):
     item_name = models.CharField(max_length=200)
     item_image = models.ImageField(upload_to='', default='default.jpeg')
     item_description = models.TextField(null=True, blank=True) 
+    item_expiration = models.DateField(null=True, blank=True)
     item_type = models.CharField(max_length=30, choices = Item_Type_Choices, default='Produce')
     created = models.DateTimeField(auto_now_add=True)
     dimension_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
