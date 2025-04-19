@@ -21,7 +21,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('add_item/', include("add_item.urls")),  # Prefix for the add_item app
-    path('inventory/', include("inventory.urls")),  # Prefix for the inventory app
-    path('', include("your_app_name.urls")),  # Default page or your main app’s URLs
+    path('', include("add_item.urls"), name="add_item"),
+    path('', include("inventory.urls"), name="login_page")
+    
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
