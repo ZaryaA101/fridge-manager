@@ -1,14 +1,3 @@
-{% for item in expiring_items %}
-  <div class="alert alert-warning">
-    ⚠️ The item <strong>{{ item.item_id.item_name }}</strong> is expiring on {{ item.expiration_date }}.
-  </div>
-{% endfor %}
-<div class="progress">
-  <div class="progress-bar bg-info" role="progressbar" style="width: {{ usage_percent }}%;" aria-valuenow="{{ usage_percent }}" aria-valuemin="0" aria-valuemax="100">
-    {{ usage_percent|floatformat:0 }}% Full
-  </div>
-</div>
-
 {% extends 'userMain.html' %} {% block loggedInContent %}
 
 <style>
@@ -44,6 +33,27 @@
 
 <div class="pd-4">
   <div class="fs-2">Family Fridge for {{request.user}}.</div>
+
+  {% for item in expiring_items %}
+  <div class="alert alert-warning">
+    ⚠️ The item <strong>{{ item.item_id.item_name }}</strong> is expiring on {{ item.expiration_date }}.
+  </div>
+{% endfor %}
+<div class="progress">
+  <div class="progress-bar bg-info" role="progressbar" style="width: {{ usage_percent }}%;" aria-valuenow="{{ usage_percent }}" aria-valuemin="0" aria-valuemax="100">
+    {{ usage_percent|floatformat:0 }}% Full
+  </div>
+</div>
+
+{% if usage_percent > 90 %}
+  <div class="alert alert-danger" role="alert">
+    ⚠️ Warning: Your fridge is almost full ({{ usage_percent|floatformat:0 }}% used)!
+  </div>
+{% elif usage_percent > 75 %}
+  <div class="alert alert-warning" role="alert">
+    Heads up: Your fridge is getting full ({{ usage_percent|floatformat:0 }}% used).
+  </div>
+{% endif %}
 
   {% if item_list %}
 
