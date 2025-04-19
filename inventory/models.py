@@ -22,7 +22,7 @@ class ItemsDetails(models.Model):
     item_name = models.CharField(max_length=200)
     item_image = models.ImageField(upload_to='', default='default.jpeg')
     item_description = models.TextField(null=True, blank=True) 
-    item_type = models.CharField(max_length=30, choices = Item_Type_Choices, default=True)
+    item_type = models.CharField(max_length=30, choices = Item_Type_Choices, default='Produce')
     created = models.DateTimeField(auto_now_add=True)
     dimension_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     dimension_width = models.DecimalField(default=1, max_digits=5, decimal_places=2)
@@ -31,9 +31,6 @@ class ItemsDetails(models.Model):
     class Meta:
         verbose_name = "Item Detail"
         verbose_name_plural = "Item Details"
-
-    def will_expire_soon(self):
-        return self.exp_date >= timezone.now() - datetime.timedelta(days=4)
     
     def __str__(self):
         return self.item_name    
@@ -86,7 +83,20 @@ class FridgeDetail(models.Model):
     compartment_width = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     compartment_height = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     added_date = models.DateTimeField(auto_now_add=True)
+    capacity = models.PositiveIntegerField(default=100)  # WHATTTT ex capacity
+    current_item_count = models.PositiveIntegerField(default=0)
     
+    def is_full(self):
+        return self.current_item_count >= self.capacity
+
+    def update_item_count(self, count):
+        new_count = self.current_item_count + count
+        if new_count < 0:
+            new_count = 0  
+        self.current_item_count = new_count
+        self.save()
+
+
     def __str__(self):
         return f"{self.family_id.family_name}'s Fridge details"
     
@@ -114,6 +124,7 @@ class FamilyTag(models.Model):
 
 # Fridge Content Model
 class FridgeContent(models.Model):
+    
     family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="fridge_contents")
     
     item_id = models.ForeignKey(ItemsDetails, on_delete=models.CASCADE, related_name="item_details")
@@ -124,6 +135,10 @@ class FridgeContent(models.Model):
     expiration_date = models.DateField(null=True, blank=True)
     added_date = models.DateTimeField(auto_now_add=True)
     
+    def will_expire_soon(self):
+        if self.expiration_date:
+            return self.expiration_date <= timezone.now().date() + datetime.timedelta(days=4)
+        return False
 
     class Meta:
         verbose_name = "Fridge Content"
