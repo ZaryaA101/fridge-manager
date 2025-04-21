@@ -1,5 +1,5 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-from inventory.tasks import check_item_expiration  
+from inventory.Tasks import check_item_expiration  
 
 def start():
     scheduler = BackgroundScheduler()

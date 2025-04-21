@@ -151,7 +151,7 @@ class FridgeContent(models.Model):
 
 class UserProfile(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="user_profile")
+    #family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="user_profile")
     overall_space = models.DecimalField(default=1, max_digits=2, decimal_places=2)
     leftdoor_space = models.DecimalField(default=1, max_digits=2, decimal_places=2)
     rightdoor_space = models.DecimalField(default=1, max_digits=2, decimal_places=2)

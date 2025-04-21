@@ -7,9 +7,12 @@ from .forms import CreateUserForm, ProfileForm
 
 from .decorators import unauthenticated_user
 
-from .models import ItemsDetails
+from .models import ItemsDetails, FridgeDetail, FridgeContent
 from . import models
 from django.contrib.auth.models import User 
+
+import datetime
+from datetime import date
 
 # Create your views here.
 @unauthenticated_user
@@ -57,10 +60,12 @@ def fridgePage(request):
     family = request.user.family_set.first()
     
     # Get fridge details for that family
+    #Error: Gets compartments. If have more than 1 compartment, returns an error
     fridge = FridgeDetail.objects.get(family_id=family)
     
     # Get today's date
-    today = timezone.now().date()
+    today = date.today()
+
 
     # Get items that will expire in the next 4 days
     expiring_items = FridgeContent.objects.filter(
@@ -71,7 +76,8 @@ def fridgePage(request):
     usage_percent = (fridge.current_item_count / fridge.capacity) * 100
 
     # Get all fridge items
-    fridge_items = FridgeContent.objects.filter(family_id=family)
+    #This variable doesn't seem to be used
+    #fridge_items = FridgeContent.objects.filter(family_id=family)
         
     
     item_list = ItemsDetails.objects.order_by("item_type")
@@ -82,9 +88,10 @@ def fridgePage(request):
 
     return render(request, "fridgePage.html", {
         "expiring_items": expiring_items,  # List of expiring items
-        "fridge_items": fridge_items,  # List of all fridge items
+        #"fridge_items": fridge_items,  # List of all fridge items
         "usage_percent": usage_percent,  # Fridge capacity percentage
         "today": today,  # Today's date
+        "item_list": item_list
     })
   
   
@@ -110,6 +117,7 @@ def addFridge(request):
 
 @login_required(login_url='heroPage')
 def profilePage(request):
+
     if request.method == "POST":
         form = ProfileForm(request.POST)
         if form.is_valid():
@@ -120,7 +128,7 @@ def profilePage(request):
 
     context = {
         'User': User,
-        'form': form
+        'form': form,
     }
 
     return render(request, 'profilePage.html', context)
