@@ -61,7 +61,7 @@ def fridgePage(request):
     
     # Get fridge details for that family
     #Error: Gets compartments. If have more than 1 compartment, returns an error
-        try:
+    try:
         fridge = FridgeDetail.objects.get(family_id=family)
     except FridgeDetail.DoesNotExist:
         # Handle the case where no fridge exists
