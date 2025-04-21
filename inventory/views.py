@@ -61,7 +61,11 @@ def fridgePage(request):
     
     # Get fridge details for that family
     #Error: Gets compartments. If have more than 1 compartment, returns an error
-    fridge = FridgeDetail.objects.get(family_id=family)
+        try:
+        fridge = FridgeDetail.objects.get(family_id=family)
+    except FridgeDetail.DoesNotExist:
+        # Handle the case where no fridge exists
+        fridge = None
     
     # Get today's date
     today = date.today()
@@ -73,7 +77,11 @@ def fridgePage(request):
         expiration_date__lte=today + datetime.timedelta(days=4)
     )
     # Calculate fridge capacity usage percentage
-    usage_percent = (fridge.current_item_count / fridge.capacity) * 100
+    if fridge:
+        usage_percent = (fridge.current_item_count / fridge.capacity) * 100
+    else:
+        # Default to 0% if no fridge exists
+        usage_percent = 0
 
     # Get all fridge items
     #This variable doesn't seem to be used
