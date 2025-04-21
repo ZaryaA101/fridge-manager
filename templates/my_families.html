@@ -12,9 +12,9 @@
           <p>Created: {{ family.created|date:"F j, Y, g:i a" }}</p>
           <!-- Display Fridge Details for the Family -->
           <h3>Fridge Details:</h3>
-          {% if family.FridgeDetails.all %}
+          {% if family.CompartmentsDetails.all %}
             <ul>
-              {% for fridge in family.FridgeDetails.all %}
+              {% for fridge in family.CompartmentsDetails.all %}
                 <li>
                   <strong>Compartment:</strong> {{ fridge.compartment_name }}<br>
                   <strong>Dimensions:</strong> {{ fridge.compartment_length }} x {{ fridge.compartment_width }} x {{ fridge.compartment_height }}<br>

@@ -41,8 +41,6 @@ class Family(models.Model):
     family_id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     family_name = models.CharField(max_length=200)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    
-    
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -59,7 +57,7 @@ class Family(models.Model):
         """
         total = Decimal("0")
         # Accessing related compartments via the related_name "FridgeDetails"
-        for compartment in self.FridgeDetails.all():
+        for compartment in self.CompartmentsDetails.all():
             comp_vol = compartment.compartment_length * compartment.compartment_width * compartment.compartment_height
             total += comp_vol
         return total
@@ -79,10 +77,6 @@ class Family(models.Model):
 
 class FridgeDetail(models.Model):
     family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="FridgeDetails")
-    compartment_name = models.CharField(max_length=200)
-    compartment_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
-    compartment_width = models.DecimalField(default=1, max_digits=5, decimal_places=2)
-    compartment_height = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     added_date = models.DateTimeField(auto_now_add=True)
     capacity = models.PositiveIntegerField(default=100)  # WHATTTT ex capacity
     current_item_count = models.PositiveIntegerField(default=0)
@@ -101,6 +95,16 @@ class FridgeDetail(models.Model):
     def __str__(self):
         return f"{self.family_id.family_name}'s Fridge details"
     
+
+class CompartmentsDetails(models.Model):
+    family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="CompartmentsDetails")
+    compartment_name = models.CharField(max_length=200)
+    compartment_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
+    compartment_width = models.DecimalField(default=1, max_digits=5, decimal_places=2)
+    compartment_height = models.DecimalField(default=1, max_digits=5, decimal_places=2)
+
+
+
 
 
 class FamilyTag(models.Model):

@@ -283,7 +283,7 @@ def manage_fridge_details(request, family_id):
                 error = "Compartment name is required."
             else:
                 # Create the new FridgeDetail record
-                models.FridgeDetail.objects.create(
+                models.CompartmentsDetails.objects.create(
                     family_id=family,
                     compartment_name=compartment_name,
                     compartment_length=compartment_length,
@@ -295,13 +295,13 @@ def manage_fridge_details(request, family_id):
         elif "remove_compartment" in request.POST:
             detail_id = request.POST.get("remove_compartment")
             if detail_id:
-                models.FridgeDetail.objects.filter(id=detail_id, family_id=family).delete()
+                models.CompartmentsDetails.objects.filter(id=detail_id, family_id=family).delete()
         
         # Redirect to the same management page (to avoid resubmission issues)
         return redirect('manage_fridge_details', family_id=family.family_id)
     
     # For GET requests, fetch the current fridge details.
-    fridge_details = models.FridgeDetail.objects.filter(family_id=family)
+    fridge_details = models.CompartmentsDetails.objects.filter(family_id=family)
     
     context = {
         "family": family,
@@ -310,6 +310,8 @@ def manage_fridge_details(request, family_id):
     }
     return render(request, "manage_fridge_details.html", context)
     
+
+@login_required(login_url='heroPage')
 def fridge_view(request):
     context = {
         'item_list': ItemsDetails.objects.all(),
