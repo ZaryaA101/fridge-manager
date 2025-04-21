@@ -25,7 +25,7 @@ def loginPage(request):
         
         if user is not None:
             login(request, user=user)
-            return redirect('fridgePage')
+            return redirect('home')
         else:
             messages.info(request, "Username or password is incorrect.")
             return render(request, 'loginPage.html') 
