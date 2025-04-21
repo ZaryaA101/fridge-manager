@@ -2,7 +2,7 @@ from datetime import date
 from django.shortcuts import render, redirect
 from .forms import ItemForm
 from django.contrib import messages
-from inventory.models import FridgeContent, FridgeDetail
+from inventory.models import FridgeContent, FridgeDetail, ItemsDetails
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
