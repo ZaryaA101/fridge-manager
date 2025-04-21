@@ -153,7 +153,7 @@
 
   {% for item in expiring_items %}
   <div class="alert alert-warning">
-    ⚠️ The item <strong>{{ item.item_id.item_name }}</strong> is expiring on {{ item.expiration_date }}.
+     The item <strong>{{ item.item_id.item_name }}</strong> is expiring on {{ item.expiration_date }}.
   </div>
 {% endfor %}
 <div class="progress">
@@ -164,7 +164,7 @@
 
 {% if usage_percent > 90 %}
   <div class="alert alert-danger" role="alert">
-    ⚠️ Warning: Your fridge is almost full ({{ usage_percent|floatformat:0 }}% used)!
+      Warning: Your fridge is almost full ({{ usage_percent|floatformat:0 }}% used)!
   </div>
 {% elif usage_percent > 75 %}
   <div class="alert alert-warning" role="alert">
