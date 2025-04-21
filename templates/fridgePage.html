@@ -146,6 +146,75 @@
       const detailsPopup = document.getElementById('item-details');
       detailsPopup.classList.remove('visible');
   }
+
+  function showEditForm() {
+      // Switch to the edit form view
+      document.getElementById('details-view').classList.add('hidden');
+      document.getElementById('edit-view').classList.remove('hidden');
+  }
+
+  function cancelEdit() {
+      // Switch back to the details view
+      document.getElementById('details-view').classList.remove('hidden');
+      document.getElementById('edit-view').classList.add('hidden');
+  }
+
+  function submitEditForm(event) {
+    event.preventDefault();
+
+    // Get the itemId from the form's data id attribute
+    const form = document.getElementById('edit-item-form');
+    const itemId = form.getAttribute('data-id');
+
+    // Get the updated values from the form
+    const updatedName = document.getElementById('edit-item-name').value;
+    const updatedDescription = document.getElementById('edit-item-description').value;
+    const updatedExpiration = document.getElementById('edit-item-expiration').value;
+
+    // Send the updated data to the backend
+    fetch(`/update-item/${itemId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+            item_name: updatedName,
+            item_description: updatedDescription,
+            item_expiration: updatedExpiration,
+        }),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                // Update the UI with the new values
+                const itemElement = document.querySelector(`img[data-id="${itemId}"]`);
+                if (itemElement) {
+                    // Update the data attributes
+                    itemElement.setAttribute('data-name', updatedName);
+                    itemElement.setAttribute('data-description', updatedDescription);
+                    itemElement.setAttribute('data-expiration', updatedExpiration);
+
+                    // Update the displayed name
+                    const nameElement = itemElement.closest('.Item').querySelector('div');
+                    if (nameElement) {
+                        nameElement.textContent = updatedName;
+                    }
+                }
+
+                // Update the details view
+                document.getElementById('item-name').textContent = `Name: ${updatedName}`;
+                document.getElementById('item-description').textContent = `Description: ${updatedDescription}`;
+                document.getElementById('item-expiration').textContent = `Expiration Date: ${new Date(updatedExpiration).toLocaleDateString()}`;
+
+                // Hide the popup
+                hideItemDetails();
+            } else {
+                alert(`Failed to update item: ${data.error}`);
+            }
+        })
+        .catch((error) => console.error('Error:', error));
+}
 </script>
 
 <div class="pd-4">
