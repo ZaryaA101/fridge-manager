@@ -3,6 +3,9 @@ from django.shortcuts import render, redirect
 from .forms import ItemForm
 from django.contrib import messages
 from inventory.models import FridgeContent, FridgeDetail
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 def add_item(request):
     family = request.user.family_set.first() 
@@ -26,3 +29,22 @@ def add_item(request):
         form = ItemForm()
 
     return render(request, "additem.html", {"form": form, "today": today})
+
+
+
+@csrf_exempt
+def update_item(request, item_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            item = ItemsDetails.objects.get(item_id=item_id)  # Use `item_id` as the primary key
+            item.item_name = data.get('item_name', item.item_name)
+            item.item_description = data.get('item_description', item.item_description)
+            item.item_expiration = data.get('item_expiration', item.item_expiration)
+            item.save()
+            return JsonResponse({'success': True})
+        except ItemsDetails.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Item not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
