@@ -97,6 +97,7 @@ class FridgeDetail(models.Model):
     
 
 class CompartmentsDetails(models.Model):
+    compartment_id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="CompartmentsDetails")
     compartment_name = models.CharField(max_length=200)
     compartment_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
@@ -131,7 +132,7 @@ class FamilyTag(models.Model):
 class FridgeContent(models.Model):
     
     family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="fridge_contents")
-    
+    compartment_id = models.ForeignKey(CompartmentsDetails, on_delete=models.CASCADE, related_name="compartment_details")
     item_id = models.ForeignKey(ItemsDetails, on_delete=models.CASCADE, related_name="item_details")
     quantity = models.PositiveIntegerField(default=1)
     item_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
