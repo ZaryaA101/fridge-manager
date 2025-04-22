@@ -218,7 +218,7 @@
 </script>
 
 <div class="pd-4">
-  <div class="fs-2">Family Fridge for {{request.user}}.</div>
+  <div class="fs-2">{{ family.family_name }} Fridge for {{request.user}}.</div>
 
   {% for item in expiring_items %}
   <div class="alert alert-warning">

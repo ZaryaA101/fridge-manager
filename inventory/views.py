@@ -56,8 +56,9 @@ def heroPage(request):
 
 
 @login_required(login_url='heroPage')
-def fridgePage(request):
-    family = request.user.family_set.first()
+def fridgePage(request, family_id):
+    #family = request.user.family_set.first()
+    family = get_object_or_404(models.Family, family_id=family_id)
     
     # Get fridge details for that family
     try:
@@ -68,8 +69,7 @@ def fridgePage(request):
     
     # Get today's date
     today = date.today()
-
-
+    
     # Get items that will expire in the next 4 days
     expiring_items = FridgeContent.objects.filter(
         family_id=family,
@@ -92,7 +92,8 @@ def fridgePage(request):
         #"fridge_items": fridge_items,  # List of all fridge items
         "usage_percent": usage_percent,  # Fridge capacity percentage
         "today": today,  # Today's date
-        "item_list": item_list
+        "item_list": item_list, 
+        "family": family,
     })
   
   
@@ -115,6 +116,7 @@ def addFridge(request):
         "fridge_list": fridge_list,
     }
     return render(request, "addFridge.html", context=context)
+
 
 @login_required(login_url='heroPage')
 def profilePage(request):
