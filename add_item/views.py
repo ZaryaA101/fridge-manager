@@ -23,7 +23,18 @@ def add_item(request):
             new_item = form.save(commit=False)
             new_item.family_id = family
             new_item.save()
-           
+
+            FridgeContent.objects.create(
+                expiration_date = new_item.item_expiration,
+                family_id = family,
+                compartment_id = family.CompartmentsDetails.get(compartment_name = new_item.item_type),
+                item_id = new_item,
+                item_length = new_item.dimension_length,
+                item_width = new_item.dimension_width,
+                item_height = new_item.dimension_height,
+                added_date = today
+            )
+
             return redirect('home')
     else:
         form = ItemForm()

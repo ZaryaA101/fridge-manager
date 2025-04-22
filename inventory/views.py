@@ -180,10 +180,51 @@ def createFamily(request):
             user=request.user
         )
 
-        # Create new Fridge
+        # Create new FridgeDetail instance
         models.FridgeDetail.objects.create(
             family_id=new_family
         )
+
+        #Create the 5 preset compartments
+        models.CompartmentsDetails.objects.create(
+            family_id=new_family,
+            compartment_name="Left Shelves",
+            compartment_length=12,
+            compartment_width=5,
+            compartment_height=6
+            )
+        
+        models.CompartmentsDetails.objects.create(
+            family_id=new_family,
+            compartment_name="Middle Shelves",
+            compartment_length=15,
+            compartment_width=15,
+            compartment_height=12
+            )
+        
+        models.CompartmentsDetails.objects.create(
+            family_id=new_family,
+            compartment_name="Right Shelves",
+            compartment_length=12,
+            compartment_width=5,
+            compartment_height=6
+            )
+        
+        models.CompartmentsDetails.objects.create(
+            family_id=new_family,
+            compartment_name="Produce",
+            compartment_length=15,
+            compartment_width=15,
+            compartment_height=12
+            )
+        
+        models.CompartmentsDetails.objects.create(
+            family_id=new_family,
+            compartment_name="Freezer",
+            compartment_length=15,
+            compartment_width=15,
+            compartment_height=12
+            )
 
         return redirect('home')
     
