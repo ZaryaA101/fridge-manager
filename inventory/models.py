@@ -107,7 +107,6 @@ class CompartmentsDetails(models.Model):
 
 
 
-
 class FamilyTag(models.Model):
     family = models.ForeignKey(Family, on_delete=models.CASCADE, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)

@@ -60,7 +60,6 @@ def fridgePage(request):
     family = request.user.family_set.first()
     
     # Get fridge details for that family
-    #Error: Gets compartments. If have more than 1 compartment, returns an error
     try:
         fridge = FridgeDetail.objects.get(family_id=family)
     except FridgeDetail.DoesNotExist:
@@ -181,6 +180,11 @@ def createFamily(request):
             user=request.user
         )
 
+        # Create new Fridge
+        models.FridgeDetail.objects.create(
+            family_id=new_family
+        )
+
         return redirect('home')
     
     context = {}
@@ -282,7 +286,7 @@ def manage_fridge_details(request, family_id):
             if not compartment_name:
                 error = "Compartment name is required."
             else:
-                # Create the new FridgeDetail record
+                # Create the new CompartmentDetails record
                 models.CompartmentsDetails.objects.create(
                     family_id=family,
                     compartment_name=compartment_name,
