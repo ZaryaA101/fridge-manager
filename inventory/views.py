@@ -83,15 +83,9 @@ def fridgePage(request):
         usage_percent = 0
 
     # Get all fridge items
-    #This variable doesn't seem to be used
     #fridge_items = FridgeContent.objects.filter(family_id=family)
         
-    
     item_list = ItemsDetails.objects.order_by("item_type")
-
-    context = {
-        "item_list": item_list,
-    }
 
     return render(request, "fridgePage.html", {
         "expiring_items": expiring_items,  # List of expiring items
@@ -185,7 +179,7 @@ def createFamily(request):
             family_id=new_family
         )
 
-        #Create the 5 preset compartments
+        #Create the 5 default compartments
         models.CompartmentsDetails.objects.create(
             family_id=new_family,
             compartment_name="Left Shelves",
@@ -354,11 +348,3 @@ def manage_fridge_details(request, family_id):
         "error": error
     }
     return render(request, "manage_fridge_details.html", context)
-    
-
-@login_required(login_url='heroPage')
-def fridge_view(request):
-    context = {
-        'item_list': ItemsDetails.objects.all(),
-    }
-    return render(request, 'fridgePage.html', context)
