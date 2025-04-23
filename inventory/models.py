@@ -103,6 +103,9 @@ class CompartmentsDetails(models.Model):
     compartment_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     compartment_width = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     compartment_height = models.DecimalField(default=1, max_digits=5, decimal_places=2)
+    
+    def __str__(self): 
+        return f"{self.compartment_name}"
 
 
 class FamilyTag(models.Model):
@@ -119,7 +122,6 @@ class FamilyTag(models.Model):
     def get_all_families_by_user(user):
         return Family.objects.filter(familytag__user=user)
         
-    
     def __str__(self):
         return f"{self.family} : {self.user} "
 

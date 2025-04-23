@@ -241,17 +241,24 @@
   </div>
 {% endif %}
 
+<button type="button" 
+  class="btn btn-primary"
+  onclick="window.location.href='{% url 'add_fridge_item' family.family_id %}'" 
+  >Add Item</button>
+
+
+
   {% if item_list %}
     <div class="container">
 
       {% for compartment in compartments %}
         <div class="Shelf">
-          <h3>{{compartment.compartment_name}}</h3>
+          <h3>{{compartment}}</h3>
         </div>
 
         <div class="row">
           {% for item in item_list %}
-            {% if item.compartment_id == compartment %}
+            {% if item.compartment_id.compartment_name == compartment.compartment_name %}
             <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
               <span class="Item">
                 {% if item.item_id.item_image %}
@@ -282,7 +289,7 @@
         {% endfor %}
       </div>
       {% endfor %}
-      
+
         <!-- Item Details Popup -->
         <div id="item-details" class="item-details hidden">
         <button class="close-btn" onclick="hideItemDetails()">X</button>

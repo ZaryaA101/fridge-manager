@@ -3,7 +3,8 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import CreateUserForm, ProfileForm
+from .forms import CreateUserForm, ProfileForm, FridgeContentForm
+
 
 from .decorators import unauthenticated_user
 
@@ -60,11 +61,10 @@ def fridgePage(request, family_id):
     #family = request.user.family_set.first()
     family = get_object_or_404(models.Family, family_id=family_id)
     compartments = models.CompartmentsDetails.objects.filter(family_id=family)
-    # Get fridge details for that family
+    
     try:
         fridge = FridgeDetail.objects.get(family_id=family)
     except FridgeDetail.DoesNotExist:
-        # Handle the case where no fridge exists
         fridge = None
     
     # Get today's date
@@ -352,3 +352,19 @@ def manage_fridge_details(request, family_id):
         "error": error
     }
     return render(request, "manage_fridge_details.html", context)
+
+
+
+def add_fridge_item(request, family_id):
+    family = get_object_or_404(models.Family, family_id=family_id)
+    if request.method == "POST":
+        form = FridgeContentForm(request.POST)
+        if form.is_valid():
+            fridge_content = form.save(commit=False)
+            fridge_content.family_id = family
+            fridge_content.save()
+            return redirect('fridgePage', family_id=family_id) # Change to your desired destination
+    else:
+        form = FridgeContentForm()
+    
+    return render(request, 'add_fridge_item.html', {'form': form})
