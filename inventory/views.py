@@ -59,7 +59,7 @@ def heroPage(request):
 def fridgePage(request, family_id):
     #family = request.user.family_set.first()
     family = get_object_or_404(models.Family, family_id=family_id)
-    
+    compartments = models.CompartmentsDetails.objects.filter(family_id=family)
     # Get fridge details for that family
     try:
         fridge = FridgeDetail.objects.get(family_id=family)
@@ -85,15 +85,17 @@ def fridgePage(request, family_id):
     # Get all fridge items
     #fridge_items = FridgeContent.objects.filter(family_id=family)
         
-    item_list = ItemsDetails.objects.order_by("item_type")
-
+    #item_list = ItemsDetails.objects.order_by("item_type")
+    item_list = FridgeContent.objects.filter(family_id=family_id)
     return render(request, "fridgePage.html", {
         "expiring_items": expiring_items,  # List of expiring items
         #"fridge_items": fridge_items,  # List of all fridge items
         "usage_percent": usage_percent,  # Fridge capacity percentage
         "today": today,  # Today's date
-        "item_list": item_list, 
+        "item_list": item_list,
         "family": family,
+        "compartments": compartments,
+        
     })
   
   

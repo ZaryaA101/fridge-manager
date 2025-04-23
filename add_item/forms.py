@@ -8,8 +8,6 @@ class ItemForm(forms.ModelForm):
             'item_name', 
             'item_image', 
             'item_description', 
-            'item_expiration',
-            'item_type', 
             'dimension_length', 
             'dimension_width', 
             'dimension_height'

@@ -243,29 +243,69 @@
 
   {% if item_list %}
     <div class="container">
-      
-      {% if item_list %}
-        <!-- Left Shelf Section -->
+
+      {% for compartment in compartments %}
         <div class="Shelf">
-          <h3>Left Shelves</h3>
+          <h3>{{compartment.compartment_name}}</h3>
         </div>
+
         <div class="row">
           {% for item in item_list %}
-            {% if item.item_type == "Left Shelves" %}
+            {% if item.compartment_id == compartment %}
             <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
               <span class="Item">
-                {% if item.item_image %}
+                {% if item.item_id.item_image %}
                 <img 
-                  src="{{ item.item_image.url }}" 
+                  src="{{ item.item_id.item_image.url }}" 
                   class="img-fluid item-image" 
+                  data-id="{{ item.item_id }}"
+                  data-name="{{ item.item_id.item_name }}" 
+                  data-description="{{ item.item_id.item_description }}"
+                  data-expiration="{{ item.expiration_date|date:'Y-m-d' }}"
+                  onclick="showItemDetails(this)"
+                >
+                {% else %}
+                  <img 
+                      src="/path/to/default/image.jpg" 
+                      class="img-fluid item-image" 
+                      data-id="{{ item.item_id }}"
+                      data-name="{{ item.item_name }}" 
+                      data-description="{{ item.item_description }}"
+                      data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
+                      onclick="showItemDetails(this)"
+                  >
+                {% endif %}
+                <div>{{ item.item_id.item_name }}</div>
+              </span>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      
+      {% comment %} {% if item_list %}
+      <!-- Left Shelf Section -->
+      <div class="Shelf">
+        <h3>Left Shelves</h3>
+      </div>
+      <div class="row">
+        {% for item in item_list %}
+        {% if item.item_type == "Left Shelves" %}
+        <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
+          <span class="Item">
+            {% if item.item_image %}
+            <img 
+            src="{{ item.item_image.url }}" 
+            class="img-fluid item-image" 
                   data-id="{{ item.item_id }}"
                   data-name="{{ item.item_name }}" 
                   data-description="{{ item.item_description }}"
                   data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
                   onclick="showItemDetails(this)"
-              >
-              {% else %}
-              <img 
+                  >
+                  {% else %}
+                  <img 
                   src="/path/to/default/image.jpg" 
                   class="img-fluid item-image" 
                   data-id="{{ item.item_id }}"
@@ -279,43 +319,43 @@
             </span>
           </div>
           {% endif %}
-        {% endfor %}
-      </div>
-      
+          {% endfor %}
+        </div>
+        
         <!-- Middle Shelf Section -->
         <div class="Shelf">
           <h3>Middle Shelves</h3>
         </div>
         <div class="row">
           {% for item in item_list %}
-            {% if item.item_type == "Middle Shelves" %}
-            <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
-              <span class="Item">
-                {% if item.item_image %}
-                <img 
-                    src="{{ item.item_image.url }}" 
-                    class="img-fluid item-image" 
-                    data-id="{{ item.item_id }}"
-                    data-name="{{ item.item_name }}" 
-                    data-description="{{ item.item_description }}"
-                    data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
-                    onclick="showItemDetails(this)"
-                >
-                {% else %}
-                <img 
-                    src="/path/to/default/image.jpg" 
-                    class="img-fluid item-image" 
-                    data-id="{{ item.item_id }}"
-                    data-name="{{ item.item_name }}" 
-                    data-description="{{ item.item_description }}"
-                    data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
-                    onclick="showItemDetails(this)"
-                >
-                {% endif %}
-                <div>{{ item.item_name }}</div>
-              </span>
-            </div>
-            {% endif %}
+          {% if item.item_type == "Middle Shelves" %}
+          <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
+            <span class="Item">
+              {% if item.item_image %}
+              <img 
+              src="{{ item.item_image.url }}" 
+              class="img-fluid item-image" 
+              data-id="{{ item.item_id }}"
+              data-name="{{ item.item_name }}" 
+              data-description="{{ item.item_description }}"
+              data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
+              onclick="showItemDetails(this)"
+              >
+              {% else %}
+              <img 
+              src="/path/to/default/image.jpg" 
+              class="img-fluid item-image" 
+              data-id="{{ item.item_id }}"
+              data-name="{{ item.item_name }}" 
+              data-description="{{ item.item_description }}"
+              data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
+              onclick="showItemDetails(this)"
+              >
+              {% endif %}
+              <div>{{ item.item_name }}</div>
+            </span>
+          </div>
+          {% endif %}
           {% endfor %}
         </div>
     
@@ -325,48 +365,48 @@
         </div>
         <div class="row">
           {% for item in item_list %}
-            {% if item.item_type == "Right Shelves" %}
-            <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
-              <span class="Item">
-                {% if item.item_image %}
-                <img 
-                    src="{{ item.item_image.url }}" 
-                    class="img-fluid item-image" 
-                    data-id="{{ item.item_id }}"
-                    data-name="{{ item.item_name }}" 
-                    data-description="{{ item.item_description }}"
-                    data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
-                    onclick="showItemDetails(this)"
-                >
-                {% else %}
-                <img 
-                    src="/path/to/default/image.jpg" 
-                    class="img-fluid item-image" 
-                    data-id="{{ item.item_id }}"
-                    data-name="{{ item.item_name }}" 
-                    data-description="{{ item.item_description }}"
-                    data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
-                    onclick="showItemDetails(this)"
-                >
-                {% endif %}
-                <div>{{ item.item_name }}</div>
-              </span>
-            </div>
-            {% endif %}
+          {% if item.item_type == "Right Shelves" %}
+          <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
+            <span class="Item">
+              {% if item.item_image %}
+              <img 
+              src="{{ item.item_image.url }}" 
+              class="img-fluid item-image" 
+              data-id="{{ item.item_id }}"
+              data-name="{{ item.item_name }}" 
+              data-description="{{ item.item_description }}"
+              data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
+              onclick="showItemDetails(this)"
+              >
+              {% else %}
+              <img 
+              src="/path/to/default/image.jpg" 
+              class="img-fluid item-image" 
+              data-id="{{ item.item_id }}"
+              data-name="{{ item.item_name }}" 
+              data-description="{{ item.item_description }}"
+              data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
+              onclick="showItemDetails(this)"
+              >
+              {% endif %}
+              <div>{{ item.item_name }}</div>
+            </span>
+          </div>
+          {% endif %}
           {% endfor %}
         </div>
-    
+        
         <!-- Freezer Shelf Section -->
         <div class="Shelf">
           <h3>Freezer</h3>
         </div>
         <div class="row">
           {% for item in item_list %}
-            {% if item.item_type == "Freezer" %}
-            <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
-              <span class="Item">
-                {% if item.item_image %}
-                <img 
+          {% if item.item_type == "Freezer" %}
+          <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
+            <span class="Item">
+              {% if item.item_image %}
+              <img 
                     src="{{ item.item_image.url }}" 
                     class="img-fluid item-image" 
                     data-id="{{ item.item_id }}"
@@ -374,9 +414,9 @@
                     data-description="{{ item.item_description }}"
                     data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
                     onclick="showItemDetails(this)"
-                >
-                {% else %}
-                <img 
+                    >
+                    {% else %}
+                    <img 
                     src="/path/to/default/image.jpg" 
                     class="img-fluid item-image" 
                     data-id="{{ item.item_id }}"
@@ -384,54 +424,54 @@
                     data-description="{{ item.item_description }}"
                     data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
                     onclick="showItemDetails(this)"
-                >
-                {% endif %}
-                <div>{{ item.item_name }}</div>
-              </span>
+                    >
+                    {% endif %}
+                    <div>{{ item.item_name }}</div>
+                  </span>
             </div>
             {% endif %}
-          {% endfor %}
-        </div>
-    
-        <!-- Produce Shelf Section -->
-        <div class="Shelf">
+            {% endfor %}
+          </div>
+          
+          <!-- Produce Shelf Section -->
+          <div class="Shelf">
           <h3>Produce</h3>
         </div>
         <div class="row">
           {% for item in item_list %}
-            {% if item.item_type == "Produce" %}
-            <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
-              <span class="Item">
-                {% if item.item_image %}
-                <img 
-                    src="{{ item.item_image.url }}" 
-                    class="img-fluid item-image" 
-                    data-id="{{ item.item_id }}"
-                    data-name="{{ item.item_name }}" 
-                    data-description="{{ item.item_description }}"
-                    data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
-                    onclick="showItemDetails(this)"
-                >
-                {% else %}
-                <img 
-                    src="/path/to/default/image.jpg" 
-                    class="img-fluid item-image" 
-                    data-id="{{ item.item_id }}"
-                    data-name="{{ item.item_name }}" 
-                    data-description="{{ item.item_description }}"
-                    data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
-                    onclick="showItemDetails(this)"
-                >
-                {% endif %}
-                <div>{{ item.item_name }}</div>
-              </span>
-            </div>
-            {% endif %}
+          {% if item.item_type == "Produce" %}
+          <div class="col-6 col-md-4 col-lg-3 text-center mb-3">
+            <span class="Item">
+              {% if item.item_image %}
+              <img 
+              src="{{ item.item_image.url }}" 
+              class="img-fluid item-image" 
+              data-id="{{ item.item_id }}"
+              data-name="{{ item.item_name }}" 
+              data-description="{{ item.item_description }}"
+              data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
+              onclick="showItemDetails(this)"
+              >
+              {% else %}
+              <img 
+              src="/path/to/default/image.jpg" 
+              class="img-fluid item-image" 
+              data-id="{{ item.item_id }}"
+              data-name="{{ item.item_name }}" 
+              data-description="{{ item.item_description }}"
+              data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
+              onclick="showItemDetails(this)"
+              >
+              {% endif %}
+              <div>{{ item.item_name }}</div>
+            </span>
+          </div>
+          {% endif %}
           {% endfor %}
-        </div>
-    
-      <!-- Item Details Popup -->
-      <div id="item-details" class="item-details hidden">
+        </div> {% endcomment %}
+
+        <!-- Item Details Popup -->
+        <div id="item-details" class="item-details hidden">
         <button class="close-btn" onclick="hideItemDetails()">X</button>
         <h3>Item Details</h3>
         <div id="details-view">
@@ -440,7 +480,7 @@
           <p id="item-expiration"></p>
           <button class="edit-btn" onclick="showEditForm()">Edit</button>
         </div>
-    
+        
         <div id="edit-view" class="hidden">
           <form id="edit-item-form" onsubmit="submitEditForm(event)">
             {% csrf_token %}
@@ -460,11 +500,13 @@
           </form>
         </div>
       </div>
-      {% endif %}
-    {% else %}
-      <p class="fs-5">There are no items in the fridge.</p>
-    {% endif %}
-  </div>
-</div>
 
-{% endblock loggedInContent %}
+    
+      {% else %}
+      <p class="fs-5">There are no items in the fridge.</p>
+      {% endif %}
+    </div>
+  </div>
+  
+  {% endblock loggedInContent %}
+  

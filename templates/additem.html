@@ -1,50 +1,26 @@
-{% extends "main.html" %}
+{% extends 'userMain.html' %} {% block loggedInContent %}
 
-{% block content %}
+
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Add Item</h1>
+    <h1 class="text-center mb-4">Register an Item to Database</h1>
     <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
-            
             <!-- Item Name -->
             <div class="mb-3">
                 <label for="item_name" class="form-label">Item Name</label>
                 <input type="text" id="item_name" name="item_name" class="form-control" placeholder="Enter item name" required>
                 <div class="invalid-feedback">Please provide the item name.</div>
             </div>
-
             <!-- Item Description -->
             <div class="mb-3">
                 <label for="item_description" class="form-label">Description</label>
                 <textarea id="item_description" name="item_description" class="form-control" rows="3" placeholder="Enter item description"></textarea>
             </div>
-
-            <!-- Expiration Date -->
-            <div class="mb-3">
-                <label for="item_expiration" class="form-label">Expiration Date</label>
-                <input type="date" id="item_expiration" name="item_expiration" class="form-control" required>
-                <div class="invalid-feedback">Please select an expiration date.</div>
-            </div>
-
             <!-- Item Image -->
             <div class="mb-3">
                 <label for="item_image" class="form-label">Image</label>
                 <input type="file" id="item_image" name="item_image" class="form-control">
             </div>
-
-        <!-- Item Type -->
-        <div class="mb-3">
-            <label for="item_type" class="form-label">Item Type</label>
-            <select id="item_type" name="item_type" class="form-select" required>
-                <option value="" disabled selected>Select item type</option>
-                <option value="Produce">Produce</option>
-                <option value="Freezer">Freezer</option>
-                <option value="Left Shelves">Left Shelves</option>
-                <option value="Middle Shelves">Middle Shelves</option>
-                <option value="Right Shelves">Right Shelves</option>
-            </select>
-            <div class="invalid-feedback">Please select an item type.</div>
-        </div>
 
         <!-- Dimensions -->
         <div class="row">
@@ -104,4 +80,7 @@
         });
     })();
 </script>
-{% endblock %}
+
+
+
+{% endblock loggedInContent %}
