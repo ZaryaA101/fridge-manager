@@ -1,79 +1,61 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'userMain.html' %}
+{% block loggedInContent %}
 
-{% block content %}
-<div class="container mt-5">
-  <h2 class="mb-4">Manage Members - {{ family.family_name }}</h2>
+<h1>Manage Members for Family: {{ family.family_name }}</h1>
 
-  <!-- Add New Member -->
-  <div class="card mb-4 p-3">
-    <h4>Add a New Member</h4>
-    <form method="POST">
-      {% csrf_token %}
-      <div class="row align-items-end">
-        <div class="col-md-6">
-          <label for="member_id" class="form-label">Select User</label>
-          <select name="member_id" class="form-select" required>
+<!-- Section: Display current family members -->
+<h2>Current Members</h2>
+{% if current_members %}
+  <ul>
+    {% for tag in current_members %}
+      <li>
+        {{ tag.user.username }}
+        {% if tag.user == family.owner %}
+          (Owner)
+        {% else %}
+          - Current Ratio: {{ tag.limit_ratio }}
+          <!-- Form to update the member's ratio -->
+          <form action="{% url 'manageFamilyMembers' family.family_id %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <!-- Pass the member's id in a hidden field -->
+            <input type="hidden" name="member_id" value="{{ tag.user.id }}">
+            <!-- New ratio input (0 to 1, in steps of 0.01) -->
+            <input type="number" name="new_ratio" step="0.01" min="0" max="1" value="{{ tag.limit_ratio }}" required>
+            <button type="submit" name="update_ratio">Update Ratio</button>
+          </form>
+          <!-- Form to remove the member -->
+          <form action="{% url 'manageFamilyMembers' family.family_id %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" name="remove_member" value="{{ tag.user.id }}">Remove</button>
+          </form>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No members added yet.</p>
+{% endif %}
+
+<!-- Section: Add a new member -->
+<h2>Add a New Member</h2>
+<form action="{% url 'manageFamilyMembers' family.family_id %}" method="post">
+    {% csrf_token %}
+    <div>
+        <label for="id_member_id">Select Member:</label>
+        <select id="id_member_id" name="member_id" required>
+            <option value="">-- Choose User --</option>
             {% for user in available_users %}
-              <option value="{{ user.id }}">{{ user.username }}</option>
+                <option value="{{ user.id }}">{{ user.username }}</option>
             {% endfor %}
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label for="limit_ratio" class="form-label">Limit Ratio (0.0 - 1.0)</label>
-          <input type="number" name="limit_ratio" step="0.01" class="form-control" min="0.01" max="1" value="{{ default_limit_ratio }}" required>
-        </div>
-        <div class="col-md-3">
-          <button type="submit" name="add_member" class="btn btn-primary mt-2">Add Member</button>
-        </div>
-      </div>
-    </form>
-  </div>
+        </select>
+    </div>
+    <div>
+        <label for="id_limit_ratio">Set Limit Ratio (0-1):</label>
+        <input type="number" id="id_limit_ratio" name="limit_ratio" step="0.01" min="0" max="1" value="0.30" required>
+    </div>
+    <button type="submit" name="add_member">Add Member</button>
+</form>
 
-  <!-- Current Members -->
-  <div class="card p-3">
-    <h4>Current Members</h4>
-    <table class="table table-bordered mt-3">
-      <thead>
-        <tr>
-          <th>Username</th>
-          <th>Limit Ratio</th>
-          <th>Update Limit</th>
-          <th>Remove</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for tag in current_members %}
-          <tr>
-            <td>{{ tag.user.username }} {% if tag.user == family.owner %}(Owner){% endif %}</td>
-            <td>{{ tag.limit_ratio }}</td>
-            <td>
-              {% if tag.user != family.owner %}
-              <form method="POST" class="d-flex">
-                {% csrf_token %}
-                <input type="hidden" name="member_id" value="{{ tag.user.id }}">
-                <input type="number" name="new_ratio" step="0.01" class="form-control me-2" min="0.01" max="1" required>
-                <button type="submit" name="update_ratio" class="btn btn-sm btn-warning">Update</button>
-              </form>
-              {% else %}
-                N/A
-              {% endif %}
-            </td>
-            <td>
-              {% if tag.user != family.owner %}
-              <form method="POST">
-                {% csrf_token %}
-                <button type="submit" name="remove_member" value="{{ tag.user.id }}" class="btn btn-sm btn-danger">Remove</button>
-              </form>
-              {% else %}
-                N/A
-              {% endif %}
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
-{% endblock %}
+{% endblock loggedInContent %}
+
 
