@@ -1,7 +1,7 @@
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User 
-from .models import UserProfile, FridgeContent, ItemsDetails
+from .models import UserProfile, FridgeContent, ItemsDetails, CompartmentsDetails
 
 import django.forms as forms
 
@@ -36,3 +36,11 @@ class FridgeContentForm(ModelForm):
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
             'expiration_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
         }
+        
+    def __init__(self, *args, **kwargs):
+        # pop off the family (or user/request) you pass in
+        family = kwargs.pop('family', None)
+        super().__init__(*args, **kwargs)
+        if family is not None:
+            # only show compartments for this family
+            self.fields['compartment_id'].queryset = CompartmentsDetails.objects.filter(family_id=family)

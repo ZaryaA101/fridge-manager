@@ -24,9 +24,11 @@
             Members: 
             {% for user in family_users %}
               {% if user.family == family %}
-                <span>{{ user.user }} </span>
+                <span>{{ user.user }}</span>
               {% endif %}
             {% endfor %}
+
+        
           </p>
             
           <small>Created: {{ family.created }}</small>

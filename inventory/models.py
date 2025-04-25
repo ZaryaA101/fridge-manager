@@ -71,8 +71,12 @@ class Family(models.Model):
         # Accessing related fridge contents via the related_name "fridge_contents"
         for content in self.FridgeContent.all():
             item_vol = content.item_length * content.item_width * content.item_height * content.quantity
+            print(content, item_vol)
             occupied += item_vol
         return occupied
+    
+    
+    
 
 
 class FridgeDetail(models.Model):
@@ -150,8 +154,11 @@ class FridgeContent(models.Model):
     
     @classmethod
     def items_added_by(cls, member, family):
-
         return cls.objects.filter(user=member, family_id=family)
+    
+    @classmethod
+    def items_added_in(cls,compartment, family):
+        return cls.objects.filter(compartment_id=compartment, family_id=family)
 
     class Meta:
         verbose_name = "Fridge Content"
