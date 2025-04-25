@@ -21,7 +21,7 @@
           {{ fridge.compartment_height }}<br>
         <form action="{% url 'manage_fridge_details' family.family_id %}" method="post" style="display:inline;">
           {% csrf_token %}
-          <button type="submit" name="remove_compartment" value="{{ fridge.id }}">
+          <button type="submit" name="remove_compartment" value="{{ fridge.pk }}">
             Remove
           </button>
         </form>

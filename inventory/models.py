@@ -69,7 +69,7 @@ class Family(models.Model):
         """
         occupied = Decimal("0")
         # Accessing related fridge contents via the related_name "fridge_contents"
-        for content in self.fridge_contents.all():
+        for content in self.FridgeContent.all():
             item_vol = content.item_length * content.item_width * content.item_height * content.quantity
             occupied += item_vol
         return occupied
@@ -83,13 +83,15 @@ class FridgeDetail(models.Model):
     
     def is_full(self):
         return self.current_item_count >= self.capacity
-
+        
+    
     def update_item_count(self, count):
         new_count = self.current_item_count + count
         if new_count < 0:
             new_count = 0  
         self.current_item_count = new_count
         self.save()
+        
 
 
     def __str__(self):
@@ -109,8 +111,8 @@ class CompartmentsDetails(models.Model):
 
 
 class FamilyTag(models.Model):
-    family = models.ForeignKey(Family, on_delete=models.CASCADE, null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    family = models.ForeignKey(Family, on_delete=models.CASCADE, null=True, blank=True, related_name="FamilyTag")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="FamilyTag")
     limit_ratio = models.DecimalField(max_digits=3, decimal_places=2, default=0.30)
     
     class Meta:
@@ -120,7 +122,7 @@ class FamilyTag(models.Model):
         
     @staticmethod
     def get_all_families_by_user(user):
-        return Family.objects.filter(familytag__user=user)
+        return Family.objects.filter(FamilyTag__user=user)
         
     def __str__(self):
         return f"{self.family} : {self.user} "
@@ -129,10 +131,10 @@ class FamilyTag(models.Model):
 
 # Fridge Content Model
 class FridgeContent(models.Model):
-    
-    family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="fridge_contents")
-    compartment_id = models.ForeignKey(CompartmentsDetails, on_delete=models.CASCADE, related_name="compartment_details")
-    item_id = models.ForeignKey(ItemsDetails, on_delete=models.CASCADE, related_name="item_details")
+    family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="FridgeContent")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="FridgeContent")
+    compartment_id = models.ForeignKey(CompartmentsDetails, on_delete=models.CASCADE, related_name="FridgeContent")
+    item_id = models.ForeignKey(ItemsDetails, on_delete=models.CASCADE, related_name="FridgeContent")
     quantity = models.PositiveIntegerField(default=1)
     item_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     item_width = models.DecimalField(default=1, max_digits=5, decimal_places=2)
@@ -144,6 +146,12 @@ class FridgeContent(models.Model):
         if self.expiration_date:
             return self.expiration_date <= timezone.now().date() + datetime.timedelta(days=4)
         return False
+    
+    
+    @classmethod
+    def items_added_by(cls, member, family):
+
+        return cls.objects.filter(user=member, family_id=family)
 
     class Meta:
         verbose_name = "Fridge Content"

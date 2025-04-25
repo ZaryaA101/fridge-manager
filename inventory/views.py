@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import CreateUserForm, ProfileForm, FridgeContentForm
 
-
+from decimal import Decimal
 from .decorators import unauthenticated_user
 
 from .models import ItemsDetails, FridgeDetail, FridgeContent
@@ -101,7 +101,7 @@ def fridgePage(request, family_id):
   
 @login_required(login_url='heroPage')
 def home(request):
-    families = models.Family.objects.filter(familytag__user=request.user)
+    families = models.Family.objects.filter(FamilyTag__user=request.user)
     family_users = models.FamilyTag.objects.filter(family_id__in=families)
     context = {
         "family_users": family_users,
@@ -337,8 +337,9 @@ def manage_fridge_details(request, family_id):
         # remove compartment
         elif "remove_compartment" in request.POST:
             detail_id = request.POST.get("remove_compartment")
+            print(f"details_id: {detail_id}")
             if detail_id:
-                models.CompartmentsDetails.objects.filter(id=detail_id, family_id=family).delete()
+                models.CompartmentsDetails.objects.filter(pk=detail_id).delete()
         
         # Redirect to the same management page (to avoid resubmission issues)
         return redirect('manage_fridge_details', family_id=family.family_id)
@@ -356,15 +357,53 @@ def manage_fridge_details(request, family_id):
 
 
 def add_fridge_item(request, family_id):
-    family = get_object_or_404(models.Family, family_id=family_id)
+    family = get_object_or_404(models.Family, pk=family_id)
+
     if request.method == "POST":
         form = FridgeContentForm(request.POST)
         if form.is_valid():
-            fridge_content = form.save(commit=False)
-            fridge_content.family_id = family
-            fridge_content.save()
-            return redirect('fridgePage', family_id=family_id) # Change to your desired destination
+            fridge_item = form.save(commit=False)
+            fridge_item.family_id = family
+            fridge_item.user      = request.user
+
+            #look up this user’s per-family limit (e.g. a fraction or %)
+            try:
+                tag = models.FamilyTag.objects.get(user=request.user, family=family)
+                limit_fraction = tag.limit_ratio 
+            except models.FamilyTag.DoesNotExist:
+                limit_fraction = None
+
+            if limit_fraction is not None:
+                existing_vol = Decimal('0')
+                for ci in models.FridgeContent.items_added_by(request.user, family):
+                    existing_vol += (
+                        ci.item_length *
+                        ci.item_width  *
+                        ci.item_height
+                    )
+                    
+                new_vol = (
+                    fridge_item.item_length *
+                    fridge_item.item_width  *
+                    fridge_item.item_height
+                )
+                
+                total_volume = family.total_volume
+
+                #if they’d exceed their allowed fraction, error out
+                if (existing_vol + new_vol) > (total_volume * Decimal(limit_fraction)):
+                    form.add_error(
+                        None,
+                        "Adding this item would exceed your allotted capacity "
+                        f"({limit_fraction*100:.0f}% of {total_volume})."
+                    )
+                    return render(request, 'add_fridge_item.html',{'form': form})
+
+            #passed the limit check, now save and redirect
+            fridge_item.save()
+            messages.success(request, "Item added successfully!")
+            return redirect('fridgePage', family_id=family_id)
     else:
         form = FridgeContentForm()
-    
-    return render(request, 'add_fridge_item.html', {'form': form})
+
+    return render(request,'add_fridge_item.html',{'form': form})
