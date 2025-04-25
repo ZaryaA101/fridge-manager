@@ -3,39 +3,36 @@
 
 <h1>My Families</h1>
 
+
 {% if families %}
     <ul>
       {% for family in families %}
-        <li>
-          <h2>{{ family.family_name }}</h2>
-          <p>Owner: {{ family.owner.username }}</p>
-          <p>Created: {{ family.created|date:"F j, Y, g:i a" }}</p>
-          <!-- Display Fridge Details for the Family -->
-          <h3>Fridge Details:</h3>
-          {% if family.CompartmentsDetails.all %}
-            <ul>
-              {% for fridge in family.CompartmentsDetails.all %}
-                <li>
-                  <strong>Compartment:</strong> {{ fridge.compartment_name }}<br>
-                  <strong>Dimensions:</strong> {{ fridge.compartment_length }} x {{ fridge.compartment_width }} x {{ fridge.compartment_height }}<br>
-                  <strong>Added Date:</strong> {{ fridge.added_date|date:"F j, Y" }}
-                </li>
-              {% endfor %}
-            </ul>
-          {% else %}
-            <p>No fridge details available.</p>
-          {% endif %}
 
-          {% if family.owner == request.user %}
-          <a href="{% url 'manageFamilyMembers' family.family_id %}">Manage Members</a>
-          <a href="{% url 'manage_fridge_details' family.family_id %}">Manage Compartments</a>
+      <div class="card my-3" style="width: 20rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{ family.family_name }}</h5>
+          <span class="card-text"> Owner: {{ family.owner.username }}</span>
+          <p class="card-text"> Created: {{ family.created|date:"F j, Y, g:i a" }}</p>
+        </div>
 
-          {% endif %}
-
-          
-
-        </li>
-      {% endfor %}
+        {% if family.CompartmentsDetails.all %}
+          <ul class="list-group list-group-flush">
+            {% for fridge in family.CompartmentsDetails.all %}
+              <li class="list-group-item">
+                <strong>Compartment:</strong> {{ fridge.compartment_name }}<br>
+                <strong>Dimensions:</strong> {{ fridge.compartment_length }} x {{ fridge.compartment_width }} x {{ fridge.compartment_height }}<br>
+              </li>
+            {% endfor %}
+          </ul>
+          <div class="card-body">
+            <a href="{% url 'manageFamilyMembers' family.family_id %}" class="btn btn-outline-primary card-link">Members</a>
+            <a href="{% url 'manage_fridge_details' family.family_id %}" class="btn btn-outline-primary card-link">Compartments</a>
+          </div>
+        </div>
+        {% else %}
+          <p>No fridge details available.</p>
+        {% endif %}
+  {% endfor %}
     </ul>
 {% else %}
     <p>You are not a member of any families yet.</p>
