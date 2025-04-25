@@ -246,15 +246,13 @@
   onclick="window.location.href='{% url 'add_fridge_item' family.family_id %}'" 
   >Add Item</button>
 
-
-
-
   {% if item_list %}
     <div class="container">
 
       {% for compartment in compartments %}
         <div class="Shelf">
-          <h3>{{compartment}}</h3>
+          <h3>{{compartment}} {{ compartment.usage_ratio|floatformat:0 }}% </h3>
+ 
         </div>
 
         <div class="row">

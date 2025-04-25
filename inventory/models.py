@@ -71,7 +71,6 @@ class Family(models.Model):
         # Accessing related fridge contents via the related_name "fridge_contents"
         for content in self.FridgeContent.all():
             item_vol = content.item_length * content.item_width * content.item_height * content.quantity
-            print(content, item_vol)
             occupied += item_vol
         return occupied
     
@@ -109,6 +108,27 @@ class CompartmentsDetails(models.Model):
     compartment_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     compartment_width = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     compartment_height = models.DecimalField(default=1, max_digits=5, decimal_places=2)
+    
+    @property
+    def occupied(self):
+        occupied = Decimal("0")
+        # Accessing related fridge contents via the related_name "fridge_contents"
+        for content in self.FridgeContent.all():
+            item_vol = content.item_length * content.item_width * content.item_height * content.quantity
+            occupied += item_vol
+        return occupied
+    
+    @property
+    def usage_ratio(self):
+        try:
+            return (self.occupied / self.total_vol) * 100
+        except (ZeroDivisionError):
+            return Decimal("0")
+    
+    @property
+    def total_vol(self):
+        return self.compartment_height * self.compartment_length * self.compartment_width
+        
     
     def __str__(self): 
         return f"{self.compartment_name}"

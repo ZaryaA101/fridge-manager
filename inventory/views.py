@@ -77,7 +77,7 @@ def fridgePage(request, family_id):
     )
     # Calculate fridge capacity usage percentage
     if fridge:
-        usage_percent = (fridge.current_item_count / fridge.capacity) * 100
+        usage_percent = (family.occupied_volume / family.total_volume) * 100
     else:
         # Default to 0% if no fridge exists
         usage_percent = 0
