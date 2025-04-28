@@ -268,7 +268,15 @@ def manageFamilyMembers(request, family_id):
                     tag.limit_ratio = new_ratio
                     tag.save()
                     
-                    
+        elif 'transfer_owner' in request.POST:
+            new_owner_id = request.POST['transfer_owner']
+            new_owner = User.objects.get(pk=new_owner_id)
+            family.owner = new_owner
+            family.save()
+            messages.success(request, f"Ownership transferred to {new_owner.username}.")
+            #return redirect('manageFamilyMembers', family_id=family.family_id)
+            return redirect('home')
+                            
         # Redirect to the same page after handling POST
         return redirect("manageFamilyMembers", family_id=family.family_id)
     

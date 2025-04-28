@@ -28,6 +28,12 @@
             {% csrf_token %}
             <button type="submit" name="remove_member" value="{{ tag.user.id }}">Remove</button>
           </form>
+
+          <!-- Transfer ownership -->
+          <form action="{% url 'manageFamilyMembers' family.family_id %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" name="transfer_owner" value="{{ tag.user.id }}">Transfer Owner</button>
+          </form>
         {% endif %}
       </li>
     {% endfor %}
