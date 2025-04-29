@@ -217,6 +217,66 @@
 }
 </script>
 
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let itemIdToRemove = null; // Store the fridge item ID to remove
+
+    function removeItem() {
+      const form = document.getElementById('edit-item-form');
+      itemIdToRemove = form.getAttribute('data-id'); // Store the fridge item ID for later use
+
+      // Bootstrap stuff
+      const removeItemModal = new bootstrap.Modal(document.getElementById('removeItemModal'));
+      removeItemModal.show();
+    }
+
+    document.getElementById('confirmRemoveItem').addEventListener('click', function () {
+      if (itemIdToRemove) {
+        fetch(`/remove-fridge-item/${itemIdToRemove}/`, { // Updated the endpoint
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          }
+        })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Remove the item from the DOM
+              const itemElement = document.querySelector(`img[data-id="${itemIdToRemove}"]`).closest('.Item');
+              if (itemElement) {
+                itemElement.remove();
+              }
+
+              // closes all popups
+              const detailsPopup = document.getElementById('item-details');
+              detailsPopup.classList.remove('visible'); // hides item details popup
+              const removeItemModal = bootstrap.Modal.getInstance(document.getElementById('removeItemModal'));
+              removeItemModal.hide(); // hide confirmation modal
+
+              // it works
+              const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+              successToast.show();
+
+              // reset the item ID
+              itemIdToRemove = null;
+            } else {
+              alert("Failed to remove item: " + data.error);
+            }
+          })
+          .catch(error => {
+            console.error("Error removing item:", error);
+            alert("An error occurred while removing the item.");
+          });
+      }
+    });
+
+    window.removeItem = removeItem;
+  });
+</script>
+
+
+
 <div class="pd-4">
   <div class="fs-2">{{ family.family_name }} Fridge for {{request.user}}.</div>
 
@@ -268,6 +328,7 @@
                   data-name="{{ item.item_id.item_name }}" 
                   data-description="{{ item.item_id.item_description }}"
                   data-expiration="{{ item.expiration_date|date:'Y-m-d' }}"
+                  data-location="{{ item.location }}"
                   onclick="showItemDetails(this)"
                 >
                 {% else %}
@@ -278,6 +339,7 @@
                       data-name="{{ item.item_name }}" 
                       data-description="{{ item.item_description }}"
                       data-expiration="{{ item.item_expiration|date:'Y-m-d' }}"
+                      data-location="{{ item.location }}"
                       onclick="showItemDetails(this)"
                   >
                 {% endif %}
@@ -298,6 +360,7 @@
           <p id="item-description"></p>
           <p id="item-expiration"></p>
           <button class="edit-btn" onclick="showEditForm()">Edit</button>
+          <button class="remove-btn btn btn-secondary" onclick="removeItem()">Remove</button>
         </div>
         
         <div id="edit-view" class="hidden">
@@ -320,7 +383,38 @@
         </div>
       </div>
 
-    
+      <!-- Remove Item Confirmation -->
+      <div class="modal fade" id="removeItemModal" tabindex="-1" aria-labelledby="removeItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="removeItemModalLabel">Confirm Item Removal</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              Are you sure you want to remove this item?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-danger" id="confirmRemoveItem">Remove</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- It worked -->
+      <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="successToast" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              Item removed successfully!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      </div>
+      
       {% else %}
       <p class="fs-5">There are no items in the fridge.</p>
       {% endif %}
