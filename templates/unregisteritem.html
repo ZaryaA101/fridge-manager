@@ -1,0 +1,38 @@
+{% extends 'userMain.html' %} {% block loggedInContent %}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Unregister an Item</h1>
+    <form method="POST" action="{% url 'unregister_item' %}" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="item_id" class="form-label">Select Item to Unregister</label>
+            <select id="item_id" name="item_id" class="form-select" required>
+                <option value="" disabled selected>Select an item</option>
+                {% for item in items %}
+                <option value="{{ item.item_id }}">{{ item.item_name }}</option>
+                {% endfor %}
+            </select>
+            <div class="invalid-feedback">Please select an item to unregister.</div>
+        </div>
+        <button type="submit" class="btn btn-danger w-100">Unregister Item</button>
+    </form>
+</div>
+
+<script>
+    // Bootstrap stuff
+    (function () {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+
+{% endblock loggedInContent %}
