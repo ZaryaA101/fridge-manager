@@ -165,6 +165,8 @@ class FridgeContent(models.Model):
     item_height = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     expiration_date = models.DateField(null=True, blank=True)
     added_date = models.DateTimeField(auto_now_add=True)
+
+    location = models.CharField(max_length=50, default='fridge')  #not fully implemented yet
     
     def will_expire_soon(self):
         if self.expiration_date:
