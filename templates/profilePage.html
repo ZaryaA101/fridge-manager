@@ -3,12 +3,19 @@
 <div class="fs-3 fw-bold">{{ User.username }} Space Allowance</div>
 
 <div style="padding: 20px; width: 400px;">
-
+    {% if profile.profile_picture %}
+    <img src="{{ profile.profile_picture.url }}">
+    <span style="margin-left: 50px; display: inline-block;">
+    <p class="fw-bold fs-4" style="margin-bottom: 5px;">{{ request.user }}</p>
+    <p class="text-secondary">Member</p>
+    </span>
+    {% else %}
     <i class="bi bi-person-circle me-2" style="font-size: 5rem;"></i>
     <span style="margin-left: 50px; display: inline-block;">
     <p class="fw-bold fs-4" style="margin-bottom: 5px;">{{ request.user }}</p>
     <p class="text-secondary">Member</p>
     </span>
+    {% endif %}
 </div>
 
 <form method="post" enctype="multipart/form-data">

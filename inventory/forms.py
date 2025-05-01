@@ -14,6 +14,7 @@ class ProfileForm(ModelForm):
     class Meta:
         model = UserProfile
         fields = [
+            'profile_picture',
             'overall_space',
             'leftdoor_space',
             'rightdoor_space',

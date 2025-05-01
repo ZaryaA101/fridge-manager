@@ -49,6 +49,12 @@ def heroPage(request):
             form.save()
             username = form.cleaned_data.get('username')
             messages.success(request, 'Account was created for ' + username)
+
+            #Create userprofile instance
+            models.UserProfile.objects.create(
+                user=get_object_or_404(User, username=username)
+            )
+
             return redirect('LoginPage')
         
     context = {'form': form}
@@ -82,6 +88,9 @@ def fridgePage(request, family_id):
         # Default to 0% if no fridge exists
         usage_percent = 0
 
+    #Get Userprofile instance
+    profile = get_object_or_404(models.UserProfile, user=request.user)
+
     # Get all fridge items
     #fridge_items = FridgeContent.objects.filter(family_id=family)
         
@@ -95,7 +104,7 @@ def fridgePage(request, family_id):
         "item_list": item_list,
         "family": family,
         "compartments": compartments,
-        
+        "profile": profile,
     })
   
   
@@ -124,16 +133,19 @@ def addFridge(request):
 def profilePage(request):
 
     if request.method == "POST":
-        form = ProfileForm(request.POST)
+        form = ProfileForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('home')
     else:
         form = ProfileForm()
 
+    profile = get_object_or_404(models.UserProfile, user=request.user)
+
     context = {
         'User': User,
         'form': form,
+        'profile': profile,
     }
 
     return render(request, 'profilePage.html', context)
