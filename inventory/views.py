@@ -62,51 +62,36 @@ def heroPage(request):
     return render(request, 'heroPage.html', context = context)
 
 
-@login_required(login_url='heroPage')
+@login_required(login_url='heroPage')  # send anonymous users to your real login form
 def fridgePage(request, family_id):
-    #family = request.user.family_set.first()
-    family = get_object_or_404(models.Family, family_id=family_id)
+    family = get_object_or_404(models.Family, pk=family_id)
+    profile, _ = models.UserProfile.objects.get_or_create(user=request.user)
+
+    #Fetch compartments and FridgeDetail
     compartments = models.CompartmentsDetails.objects.filter(family_id=family)
-    
-    try:
-        fridge = FridgeDetail.objects.get(family_id=family)
-    except FridgeDetail.DoesNotExist:
-        fridge = None
-    
-    # Get today's date
+    fridge = FridgeDetail.objects.filter(family_id=family).first()  # returns None if missing
+
+    #Compute expirations and usage
     today = date.today()
-    
-    # Get items that will expire in the next 4 days
     expiring_items = FridgeContent.objects.filter(
         family_id=family,
         expiration_date__lte=today + datetime.timedelta(days=4)
     )
-    # Calculate fridge capacity usage percentage
-    if fridge:
-        usage_percent = (family.occupied_volume / family.total_volume) * 100
-    else:
-        # Default to 0% if no fridge exists
-        usage_percent = 0
+    usage_percent = (family.occupied_volume / family.total_volume * 100) if fridge else 0
 
-    #Get Userprofile instance
-    profile = get_object_or_404(models.UserProfile, user=request.user)
+    #All fridge contents
+    item_list = FridgeContent.objects.filter(family_id=family)
 
-    # Get all fridge items
-    #fridge_items = FridgeContent.objects.filter(family_id=family)
-        
-    #item_list = ItemsDetails.objects.order_by("item_type")
-    item_list = FridgeContent.objects.filter(family_id=family_id)
     return render(request, "fridgePage.html", {
-        "expiring_items": expiring_items,  # List of expiring items
-        #"fridge_items": fridge_items,  # List of all fridge items
-        "usage_percent": usage_percent,  # Fridge capacity percentage
-        "today": today,  # Today's date
-        "item_list": item_list,
-        "family": family,
-        "compartments": compartments,
-        "profile": profile,
+        "family":         family,
+        "profile":        profile,
+        "compartments":   compartments,
+        "fridge":         fridge,
+        "expiring_items": expiring_items,
+        "usage_percent":  usage_percent,
+        "today":          today,
+        "item_list":      item_list,
     })
-  
   
 @login_required(login_url='heroPage')
 def home(request):
