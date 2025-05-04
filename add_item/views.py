@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from inventory.forms import FridgeContentForm
 from django.contrib import messages
 from inventory.models import *
-
+import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal
