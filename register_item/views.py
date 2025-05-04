@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ItemForm
 from django.contrib import messages
 from inventory.models import FridgeContent, FridgeDetail, ItemsDetails, CompartmentsDetails
-import json
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -54,8 +54,3 @@ def unregister_item_page(request):
     # gets all availble items in the database
     items = ItemsDetails.objects.all()
     return render(request, 'unregisteritem.html', {'items': items})
-
-
-
-
-
