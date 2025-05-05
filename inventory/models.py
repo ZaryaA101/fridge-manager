@@ -183,6 +183,7 @@ class FridgeContent(models.Model):
         return cls.objects.filter(compartment_id=compartment, family_id=family)
 
     class Meta:
+        unique_together = ('family_id', 'compartment_id', 'item_id', 'expiration_date')
         verbose_name = "Fridge Content"
         verbose_name_plural = "Fridge Contents"
 
