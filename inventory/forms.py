@@ -15,11 +15,9 @@ class ProfileForm(ModelForm):
         model = UserProfile
         fields = [
             'profile_picture',
-            'overall_space',
         ]
         widgets = {
             'profile_picture': forms.FileInput(attrs={'class': 'form-select'}),
-            'overall_space': forms.NumberInput(attrs={'class': 'form-control', 'max': 1, 'min': 0}),
         }
 
 class FridgeContentForm(ModelForm):

@@ -193,9 +193,7 @@ class FridgeContent(models.Model):
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name="UserProfile")
-    #family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="user_profile")
     profile_picture = models.ImageField(upload_to='', blank=True)
-    overall_space = models.DecimalField(default=Decimal('1.00'), max_digits=5, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
 
     def __str__(self):
         return f"{self.user} has {self.profile_picture} for their profile picture and is limited to {self.overall_space} overall."

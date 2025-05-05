@@ -82,7 +82,14 @@ def fridgePage(request, family_id):
     #All fridge contents
     item_list = FridgeContent.objects.filter(family_id=family)
 
-    # Get all user fridge items
+    #Get user limit ratio
+    tag = models.FamilyTag.objects.get(user=request.user, family=family)
+    if tag.limit_ratio and request.user != family.owner:
+        limit_fraction = tag.limit_ratio
+    else:
+        limit_fraction = 1
+
+    # Get all user's fridge items
     user_items = FridgeContent.objects.filter(user=request.user)
 
     #Calculate user usage percent
@@ -101,7 +108,7 @@ def fridgePage(request, family_id):
         "usage_percent":  usage_percent,
         "today":          today,
         "item_list":      item_list,
-        "profile_percent":profile.overall_space*100,
+        "limit_fraction": limit_fraction*100,
         "user_percent":   user_percent,
     })
   

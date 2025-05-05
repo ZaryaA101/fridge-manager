@@ -320,7 +320,9 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
 {% endif %}
 
+<div style="font-size: 17px;">You are currently using {{ user_percent|floatformat:0 }}% of your {{ limit_fraction|floatformat:0 }}%</div>
 <button type="button" 
+  style="margin-top:5px"
   class="btn btn-primary"
   onclick="window.location.href='{% url 'add_item' family.family_id %}'" 
   >Add Item</button>
