@@ -102,31 +102,40 @@
 </style>
 
 <script>
-  function showItemDetails(imageElement) {
-    // Get the item's details from the data attributes
+function showItemDetails(imageElement) {
     const itemId = imageElement.getAttribute('data-id');
     const itemName = imageElement.getAttribute('data-name');
     const itemDescription = imageElement.getAttribute('data-description');
-    const itemExpiration = imageElement.getAttribute('data-expiration'); 
-    const itemLocation = imageElement.getAttribute('data-location');
-    
-    // Sets the location in the details block
-    document.getElementById('item-location').textContent = `Location: ${itemLocation}`;
-    
-    // fills the details block
+    const itemExpiration = imageElement.getAttribute('data-expiration');
+    const compartmentId = imageElement.getAttribute('data-location');
+    const familyId = '{{ family.family_id }}'; 
+
+    // Set the compartmentId in the form for later use
+    const form = document.getElementById('edit-item-form');
+    form.setAttribute('data-id', itemId);
+    form.setAttribute('data-compartment-id', compartmentId);
+
+    console.log('showdetails Item ID:', itemId);
+    console.log('showdetails Compartment ID:', compartmentId);
+    console.log('showdetails Family ID:', familyId);
+    // Update the "Remove" button's onclick handler
+    const removeButton = document.querySelector('.remove-btn');
+    removeButton.setAttribute(
+        'onclick',
+        `removeItem('${itemId}', '${compartmentId}', '${familyId}')`
+    );
+
+    // Populate the details popup with the latest data
     document.getElementById('item-name').textContent = `Name: ${itemName}`;
     document.getElementById('item-description').textContent = `Description: ${itemDescription}`;
-    document.getElementById('item-expiration').textContent = `Expiration Date: ${itemExpiration}`; // Use the raw string
+    document.getElementById('item-expiration').textContent = `Expiration Date: ${itemExpiration}`;
 
-    // Stores the current item details in the edit form
+    // Populate the edit form with the latest data
     document.getElementById('edit-item-name').value = itemName;
     document.getElementById('edit-item-description').value = itemDescription;
-    document.getElementById('edit-item-expiration').value = itemExpiration; // Pre-fill the expiration date
+    document.getElementById('edit-item-expiration').value = itemExpiration;
 
-    // Stores the itemId for later use in the form submission
-    document.getElementById('edit-item-form').setAttribute('data-id', itemId);
-
-    // Shows the item details popup block
+    // Show the item details popup
     const detailsPopup = document.getElementById('item-details');
     detailsPopup.classList.add('visible');
     document.getElementById('details-view').classList.remove('hidden');
@@ -154,17 +163,16 @@
   function submitEditForm(event) {
     event.preventDefault();
 
-    // Get the itemId from the form's data id attribute
     const form = document.getElementById('edit-item-form');
     const itemId = form.getAttribute('data-id');
-    
-    // Get the updated values from the form
+    const compartmentId = form.getAttribute('data-compartment-id'); // Retrieve the compartmentId
+
     const updatedName = document.getElementById('edit-item-name').value;
     const updatedDescription = document.getElementById('edit-item-description').value;
     const updatedExpiration = document.getElementById('edit-item-expiration').value;
+    const familyId = '{{ family.family_id }}';
 
-    // Send the updated data to the backend
-      fetch(`/addItem/update-item/${itemId}/`, {
+    fetch(`/addItem/update-item/${itemId}/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -174,185 +182,117 @@
             item_name: updatedName,
             item_description: updatedDescription,
             item_expiration: updatedExpiration,
+            family_id: familyId,
+            compartment_id: compartmentId, // Include compartmentId in the request
         }),
     })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the UI with the new values
+            const itemElement = document.querySelector(`img[data-id="${itemId}"][data-location="${compartmentId}"]`);
+            if (itemElement) {
+                // Update the data attributes
+                itemElement.setAttribute('data-name', updatedName);
+                itemElement.setAttribute('data-description', updatedDescription);
+                itemElement.setAttribute('data-expiration', updatedExpiration);
             }
-            return response.json();
-        })
-        .then((data) => {
-            if (data.success) {
-                // Update the UI with the new values
-                const itemElement = document.querySelector(`img[data-id="${itemId}"]`);
-                if (itemElement) {
-                    // Update the data attributes
-                    itemElement.setAttribute('data-name', updatedName);
-                    itemElement.setAttribute('data-description', updatedDescription);
-                    itemElement.setAttribute('data-expiration', updatedExpiration);
 
-                    // Update the displayed name
-                    const nameElement = itemElement.closest('.Item').querySelector('div');
-                    if (nameElement) {
-                        nameElement.textContent = updatedName;
-                    }
-                }
+            // Update the details view if it's currently open
+            document.getElementById('item-name').textContent = `Name: ${updatedName}`;
+            document.getElementById('item-description').textContent = `Description: ${updatedDescription}`;
+            document.getElementById('item-expiration').textContent = `Expiration Date: ${new Date(updatedExpiration).toLocaleDateString()}`;
 
-                // Update the details view
-                document.getElementById('item-name').textContent = `Name: ${updatedName}`;
-                document.getElementById('item-description').textContent = `Description: ${updatedDescription}`;
-                document.getElementById('item-expiration').textContent = `Expiration Date: ${new Date(updatedExpiration).toLocaleDateString()}`;
-
-                // Hide the popup
-                hideItemDetails();
-            } else {
-                alert(`Failed to update item: ${data.error}`);
-            }
-        })
-        .catch((error) => console.error('Error:', error));
+            hideItemDetails(); // Close the popup
+        } else {
+            alert(`Failed to update item: ${data.error}`);
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
-</script>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    let itemIdToRemove = null; // Store the fridge item ID to remove
 
-    function removeItem() {
-      const form = document.getElementById('edit-item-form');
-      itemIdToRemove = form.getAttribute('data-id'); // Store the fridge item ID for later use
 
-      // Bootstrap stuff
-      const removeItemModal = new bootstrap.Modal(document.getElementById('removeItemModal'));
-      removeItemModal.show();
+// item removal function
+document.addEventListener('DOMContentLoaded', function () {
+    let itemIdToRemove = null; 
+    let compartmentIdToRemove = null; 
+    let familyIdToRemove = null; 
+
+    // Function to trigger the confirmation modal
+    function removeItem(itemId, compartmentId, familyId) {
+        if (!itemId || !compartmentId || !familyId) {
+            console.error('Missing parameters for item removal:', { itemId, compartmentId, familyId });
+            alert('Failed to remove item: Missing required parameters.');
+            return;
+        }
+        console.log('Removing item with:', { itemId, compartmentId, familyId });
+        // Store the IDs for later use
+        itemIdToRemove = itemId;
+        compartmentIdToRemove = compartmentId;
+        familyIdToRemove = familyId;
+        console.log('Removing item with about:', { itemIdToRemove, compartmentIdToRemove, familyIdToRemove });
+        // Show the confirmation
+        const removeItemModal = new bootstrap.Modal(document.getElementById('removeItemModal'));
+        removeItemModal.show();
     }
-
+    
+    // Event listener for the confirmation button
     document.getElementById('confirmRemoveItem').addEventListener('click', function () {
-      if (itemIdToRemove) {
-        fetch(`/remove-fridge-item/${itemIdToRemove}/`, { // Updated the endpoint
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-          }
-        })
-          .then(response => response.json())
-          .then(data => {
-            if (data.success) {
-              // Remove the item from the DOM
-              const itemElement = document.querySelector(`img[data-id="${itemIdToRemove}"]`).closest('.Item');
-              if (itemElement) {
-                itemElement.remove();
-              }
+        
+        if (itemIdToRemove && compartmentIdToRemove && familyIdToRemove) {
+            
+            fetch(`/addItem/remove-item/${encodeURIComponent(itemIdToRemove)}/?compartment_id=${encodeURIComponent(compartmentIdToRemove)}&family_id=${encodeURIComponent(familyIdToRemove)}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the item from the DOM
+                    const itemElement = document.querySelector(`img[data-id="${itemIdToRemove}"][data-location="${compartmentIdToRemove}"]`);
+                    if (itemElement) {
+                        itemElement.closest('.Item').remove();
+                    }
 
-              // closes all popups
-              const detailsPopup = document.getElementById('item-details');
-              detailsPopup.classList.remove('visible'); // hides item details popup
-              const removeItemModal = bootstrap.Modal.getInstance(document.getElementById('removeItemModal'));
-              removeItemModal.hide(); // hide confirmation modal
+                    // Close the item details popup and confirmation modal
+                    hideItemDetails();
+                    const removeItemModal = bootstrap.Modal.getInstance(document.getElementById('removeItemModal'));
+                    removeItemModal.hide();
 
-              // it works
-              const successToast = new bootstrap.Toast(document.getElementById('successToast'));
-              successToast.show();
+                    // Show the success 
+                    const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+                    successToast.show();
 
-              // reset the item ID
-              itemIdToRemove = null;
-            } else {
-              alert("Failed to remove item: " + data.error);
-            }
-          })
-          .catch(error => {
-            console.error("Error removing item:", error);
-            alert("An error occurred while removing the item.");
-          });
-      }
+                    // Reset the stored IDs
+                    itemIdToRemove = null;
+                    compartmentIdToRemove = null;
+                    familyIdToRemove = null;
+
+                    // Check if the fridge is empty and update the UI
+                    const remainingItems = document.querySelectorAll('.Item');
+                    if (remainingItems.length === 0) {
+                        document.querySelector('.container').innerHTML = '<p class="fs-5">There are no items in the fridge.</p>';
+                    }
+                } else {
+                    alert("Failed to remove item: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error("Error removing item:", error);
+                alert("An error occurred while removing the item.");
+            });
+        }
     });
 
     window.removeItem = removeItem;
-  });
-
-
-
-
-
-  //Still working on it
-  function removeItem(itemId, location, familyId) {
-    console.log('Remove item called with:', itemId, location, familyId);
-
-    if (!itemId || !location || !familyId) {
-        console.error('Missing parameters for item removal:', { itemId, location, familyId });
-        alert('Failed to remove item: Missing required parameters.');
-        return;
-    }
-
-    itemIdToRemove = { itemId, location, familyId };
-    // Show the confirmation modal
-    const removeItemModal = new bootstrap.Modal(document.getElementById('removeItemModal'));
-    removeItemModal.show();
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  document.getElementById('confirmRemoveItem').addEventListener('click', function () {
-    if (itemIdToRemove) {
-      const { itemId, location, familyId } = itemIdToRemove;
-
-      console.log('Sending DELETE request to:', `/remove-fridge-item/${encodeURIComponent(itemId)}/?location=${encodeURIComponent(location)}&family_id=${encodeURIComponent(familyId)}`);
-      
-
-
-
-
-      console.log('Editing item with ID:', itemId);
-      console.log('Editing item with Location:', location);
-      console.log('Editing item with famID:', familyId);
-      //here is where it all goes wrong
-      fetch(`/addItem/remove-item/${encodeURIComponent(itemId)}/?location=${encodeURIComponent(location)}&family_id=${encodeURIComponent(familyId)}`, {
-    method: 'DELETE',
-    headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-      },
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Remove the item from the DOM
-            const itemElement = document.querySelector(`img[data-id="${itemId}"][data-location="${location}"]`).closest('.Item');
-            console.log('Item removed successfully:', data.message);
-            if (itemElement) {
-              itemElement.remove();
-            }
-
-            // Closes the confirmation modal
-            const removeItemModal = bootstrap.Modal.getInstance(document.getElementById('removeItemModal'));
-            removeItemModal.hide();
-
-            // Shows success 
-            const successToast = new bootstrap.Toast(document.getElementById('successToast'));
-            successToast.show();
-
-            // Reset the item ID
-            itemIdToRemove = null;
-
-            // Check if the fridge is empty and update the UI
-            const remainingItems = document.querySelectorAll('.Item');
-            if (remainingItems.length === 0) {
-              document.querySelector('.container').innerHTML = '<p class="fs-5">There are no items in the fridge.</p>';
-            }
-          } else {
-            alert("Failed to remove item: " + data.error);
-          }
-        })
-        .catch(error => {
-          console.error("Error removing item:", error);
-          alert("An error occurred while removing the item.");
-        });
-    }
-  });
 });
 
-  
 </script>
+
 
 
 
@@ -380,14 +320,10 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
 {% endif %}
 
-<span>
 <button type="button" 
-  style="margin-top:5px"
   class="btn btn-primary"
   onclick="window.location.href='{% url 'add_item' family.family_id %}'" 
   >Add Item</button>
-<p>You are currently using {{ user_percent|floatformat:0 }}% of your {{ profile_percent|floatformat:0 }}%</p>
-</span>
 
   {% if item_list %}
     <div class="container">
@@ -411,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   data-name="{{ item.item_id.item_name }}" 
                   data-description="{{ item.item_id.item_description }}"
                   data-expiration="{{ item.expiration_date|date:'Y-m-d' }}"
-                  data-location="{{ item.compartment_id.compartment_name }}"
+                  data-location="{{ item.compartment_id.compartment_id }}"
                   onclick="showItemDetails(this)"
                 >
                 {% else %}
@@ -422,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function () {
                   data-name="{{ item.item_id.item_name }}" 
                   data-description="{{ item.item_id.item_description }}"
                   data-expiration="{{ item.expiration_date|date:'Y-m-d' }}"
-                  data-location="{{ item.compartment_id.compartment_name }}"
+                  data-location="{{ item.compartment_id.compartment_id }}"
                   onclick="showItemDetails(this)"
                   >
                 {% endif %}
@@ -442,16 +378,10 @@ document.addEventListener('DOMContentLoaded', function () {
           <p id="item-name"></p>
           <p id="item-description"></p>
           <p id="item-expiration"></p>
-          <p id="item-location" hidden></p>
+          <p id="item-location" ></p>
+          
           <button class="edit-btn" onclick="showEditForm()">Edit</button>
-                    <button class="remove-btn btn btn-secondary" 
-                  onclick="removeItem(
-                      document.getElementById('edit-item-form').getAttribute('data-id'), 
-                      document.getElementById('item-location').textContent.split(': ')[1], 
-                      '{{ family.family_id }}'
-                  )">
-              Remove
-          </button>
+          <button class="remove-btn btn btn-secondary" onclick="removeItem()">Remove</button>
         </div>
         
         <div id="edit-view" class="hidden">
