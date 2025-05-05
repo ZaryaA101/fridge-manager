@@ -109,6 +109,7 @@ def fridgePage(request, family_id):
         "today":          today,
         "item_list":      item_list,
         "limit_fraction": limit_fraction*100,
+        "user_limit_space": limit_fraction*family.total_volume, 
         "user_percent":   user_percent,
     })
   
