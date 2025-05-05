@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 def register_item(request):
-    family = request.user.family_set.first() 
+    #family = request.user.family_set.first() 
     # fridge = FridgeDetail.objects.get(family_id=family) 
     # compartments = CompartmentsDetails.objects.filter(family_id=family)
     # total_items = FridgeContent.objects.filter(family_id=family).count() 
