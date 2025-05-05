@@ -82,6 +82,16 @@ def fridgePage(request, family_id):
     #All fridge contents
     item_list = FridgeContent.objects.filter(family_id=family)
 
+    # Get all user fridge items
+    user_items = FridgeContent.objects.filter(user=request.user)
+
+    #Calculate user usage percent
+    user_volume = 0
+    for item in user_items:
+        user_volume += item.item_length * item.item_width * item.item_height * item.quantity
+
+    user_percent = (user_volume / family.total_volume * 100) if fridge else 0
+
     return render(request, "fridgePage.html", {
         "family":         family,
         "profile":        profile,
@@ -91,6 +101,8 @@ def fridgePage(request, family_id):
         "usage_percent":  usage_percent,
         "today":          today,
         "item_list":      item_list,
+        "profile_percent":profile.overall_space*100,
+        "user_percent":   user_percent,
     })
   
 @login_required(login_url='heroPage')
@@ -117,15 +129,15 @@ def addFridge(request):
 @login_required(login_url='heroPage')
 def profilePage(request):
 
+    profile = get_object_or_404(models.UserProfile, user=request.user)
+
     if request.method == "POST":
-        form = ProfileForm(request.POST, request.FILES)
+        form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
             return redirect('home')
     else:
-        form = ProfileForm()
-
-    profile = get_object_or_404(models.UserProfile, user=request.user)
+        form = ProfileForm(instance=profile)
 
     context = {
         'User': User,

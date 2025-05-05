@@ -4,7 +4,7 @@
 
 <div style="padding: 20px; width: 400px;">
     {% if profile.profile_picture %}
-    <img src="{{ profile.profile_picture.url }}">
+    <img src="{{ profile.profile_picture.url }}" width="100px">
     <span style="margin-left: 50px; display: inline-block;">
     <p class="fw-bold fs-4" style="margin-bottom: 5px;">{{ request.user }}</p>
     <p class="text-secondary">Member</p>
@@ -21,8 +21,8 @@
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Submit</button>
-    <button type="button" onclick="window.location.href='/home'; return false;">Return Home</button>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="button" class="btn btn-secondary" onclick="window.location.href='/home'; return false;">Return Home</button>
 </form>
 
 

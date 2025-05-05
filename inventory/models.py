@@ -195,10 +195,6 @@ class UserProfile(models.Model):
     #family_id = models.ForeignKey(Family, on_delete=models.CASCADE, related_name="user_profile")
     profile_picture = models.ImageField(upload_to='', blank=True)
     overall_space = models.DecimalField(default=Decimal('1.00'), max_digits=5, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
-    leftdoor_space = models.DecimalField(default=Decimal('1.00'), max_digits=5, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
-    rightdoor_space = models.DecimalField(default=Decimal('1.00'), max_digits=5, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
-    producebin_space = models.DecimalField(default=Decimal('1.00'), max_digits=5, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
-    freezer_space = models.DecimalField(default=Decimal('1.00'), max_digits=5, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
 
     def __str__(self):
         return f"{self.user} has {self.profile_picture} for their profile picture and is limited to {self.overall_space} overall."

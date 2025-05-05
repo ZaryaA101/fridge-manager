@@ -16,11 +16,11 @@ class ProfileForm(ModelForm):
         fields = [
             'profile_picture',
             'overall_space',
-            'leftdoor_space',
-            'rightdoor_space',
-            'producebin_space',
-            'freezer_space'
         ]
+        widgets = {
+            'profile_picture': forms.FileInput(attrs={'class': 'form-select'}),
+            'overall_space': forms.NumberInput(attrs={'class': 'form-control', 'max': 1, 'min': 0}),
+        }
 
 class FridgeContentForm(ModelForm):
     item_id = forms.ModelChoiceField(
