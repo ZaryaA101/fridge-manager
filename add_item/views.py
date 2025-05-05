@@ -4,6 +4,7 @@ from inventory.forms import FridgeContentForm
 from django.contrib import messages
 from inventory.models import *
 import json
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal
@@ -15,7 +16,7 @@ def add_item(request, family_id):
         form = FridgeContentForm(request.POST)
         if form.is_valid():
             fridge_item = form.save(commit=False)
-            fridge_item.family_id = family
+            fridge_item.family_id = get_object_or_404(Family, pk=family_id)
             fridge_item.user = request.user
             
             item: ItemsDetails = form.cleaned_data['item_id']
@@ -29,7 +30,7 @@ def add_item(request, family_id):
                     fridge_item.item_height *
                     fridge_item.quantity
                 )
-
+            
             #look up this user’s per-family limit
             try:
                 tag = FamilyTag.objects.get(user=request.user, family=family)
@@ -63,7 +64,6 @@ def add_item(request, family_id):
 
                 
             #check compartment limit
-
             compartment = fridge_item.compartment_id
             compartment_vol = (compartment.compartment_length * 
                                compartment.compartment_width * 
@@ -98,14 +98,31 @@ def update_item(request, item_id):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            item = ItemsDetails.objects.get(item_id=item_id)
-            item.item_name = data.get('item_name', item.item_name)
-            item.item_description = data.get('item_description', item.item_description)
-            item.item_expiration = data.get('item_expiration', item.item_expiration)
-            item.save()
+            family_id = data.get('family_id')
+            compartment_id = data.get('compartment_id')
+
+            if not family_id or not compartment_id:
+                return JsonResponse({'success': False, 'error': 'Missing required fields'}, status=400)
+
+            # Get the fridge item
+            fridge_item = get_object_or_404(
+                FridgeContent,
+                item_id=item_id,
+                family_id=family_id,
+                compartment_id=compartment_id
+            )
+
+            # Update the related ItemsDetails object
+            item_details = fridge_item.item_id
+            item_details.item_name = data.get('item_name')
+            item_details.item_description = data.get('item_description')
+            item_details.save()  
+
+            # Update the FridgeContent object
+            fridge_item.expiration_date = data.get('item_expiration')
+            fridge_item.save()  
+
             return JsonResponse({'success': True})
-        except ItemsDetails.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Item not found'}, status=404)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
@@ -113,24 +130,25 @@ def update_item(request, item_id):
 
 @csrf_exempt
 def remove_item(request, item_id):
-    print(f"Request method: {request.method}")  # Debugging stuff
     if request.method == 'DELETE':
-        fridge_id = request.GET.get('family_id')
-        location = request.GET.get('location')
+        family_id = request.GET.get('family_id')
+        compartment_id = request.GET.get('compartment_id')
 
-        if not fridge_id or not location:
-            return JsonResponse({'success': False, 'error': 'Fridge ID and location are required.'}, status=400)
+        if not family_id or not compartment_id:
+            return JsonResponse({'success': False, 'error': 'Family ID and compartment ID are required.'}, status=400)
 
         try:
+            # Find and delete the specific fridge content
             fridge_item = get_object_or_404(
                 FridgeContent,
                 item_id=item_id,
-                family_id=fridge_id,
-                location=location
+                family_id=family_id,
+                compartment_id=compartment_id
             )
             fridge_item.delete()
             return JsonResponse({'success': True, 'message': 'Item removed successfully.'})
         except FridgeContent.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Item not found in the specified fridge and location.'}, status=404)
+            return JsonResponse({'success': False, 'error': 'Item not found in the specified fridge and compartment.'}, status=404)
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
+
