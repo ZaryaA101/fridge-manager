@@ -25,7 +25,7 @@ def check_fridge_capacity():
         if usage_ratio >= threshold:
             for user in fridge.family.members.all():
                 send_mail(
-                    subject='⚠️ Fridge Almost Full',
+                    subject=' Fridge Almost Full',
                     message=f"Hi {user.username},\n\nYour fridge '{fridge.name}' is {int(usage_ratio * 100)}% full.",
                     from_email='admin@fridgeapp.com',
                     recipient_list=[user.email],
