@@ -13,7 +13,7 @@ def add_item(request, family_id):
     family = get_object_or_404(Family, pk=family_id)
 
     if request.method == "POST":
-        form = FridgeContentForm(request.POST)
+        form = FridgeContentForm(request.POST, family=family)
         if form.is_valid():
             fridge_item = form.save(commit=False)
             fridge_item.family_id = get_object_or_404(Family, pk=family_id)
