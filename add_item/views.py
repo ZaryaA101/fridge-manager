@@ -23,7 +23,7 @@ def add_item(request, family_id):
             fridge_item.item_length = item.dimension_length
             fridge_item.item_width = item.dimension_width
             fridge_item.item_height = item.dimension_height
-            
+            fridge_item.compartment_id = form.cleaned_data['compartment_id']
             new_vol = (
                     fridge_item.item_length *
                     fridge_item.item_width  *
@@ -85,6 +85,7 @@ def add_item(request, family_id):
                     return render(request, 'addItem.html',{'form': form})
                 
             #passed the limit check, now save and redirect
+            
             fridge_item.save()
             messages.success(request, "Item added successfully!")
             return redirect('fridgePage', family_id=family_id)
