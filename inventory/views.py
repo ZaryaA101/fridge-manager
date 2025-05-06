@@ -206,7 +206,7 @@ def createFamily(request):
             compartment_name="Left Shelves",
             compartment_length=12,
             compartment_width=5,
-            compartment_height=6
+            compartment_height=8
             )
         
         models.CompartmentsDetails.objects.create(
@@ -222,7 +222,7 @@ def createFamily(request):
             compartment_name="Right Shelves",
             compartment_length=12,
             compartment_width=5,
-            compartment_height=6
+            compartment_height=8
             )
         
         models.CompartmentsDetails.objects.create(
