@@ -30,7 +30,10 @@ def add_item(request, family_id):
                     fridge_item.item_height *
                     fridge_item.quantity
                 )
-            
+
+            # Set the default description from ItemsDetails
+            fridge_item.item_description = item.item_description
+
             #look up this user’s per-family limit
             try:
                 tag = FamilyTag.objects.get(user=request.user, family=family)
@@ -121,7 +124,11 @@ def update_item(request, item_id):
             fridge_item.quantity = data.get('item_count')
             fridge_item.save() 
 
-            return JsonResponse({'success': True})
+            # Recalculate the occupied volume for the compartment
+            compartment = fridge_item.compartment_id
+            occupied = compartment.occupied
+
+            return JsonResponse({'success': True, 'new_count': fridge_item.quantity, 'occupied': occupied})
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
