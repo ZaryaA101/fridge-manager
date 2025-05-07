@@ -3,18 +3,36 @@
 
 <div class="container mt-5">
     <h1 class="text-center mb-4">Register an Item to the Database</h1>
+
+    {% if messages %}
+    <div class="alert alert-danger">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
         {% csrf_token %}
             <!-- Item Name -->
             <div class="mb-3">
                 <label for="item_name" class="form-label">Item Name</label>
-                <input type="text" id="item_name" name="item_name" class="form-control" placeholder="Enter item name" required>
-                <div class="invalid-feedback">Please provide the item name.</div>
+                <input type="text" id="item_name" name="item_name" class="form-control {% if form.item_name.errors %}is-invalid{% endif %}" placeholder="Enter item name" value="{{ form.item_name.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                    {% for error in form.item_name.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
             </div>
             <!-- Item Description -->
             <div class="mb-3">
                 <label for="item_description" class="form-label">Description</label>
-                <textarea id="item_description" name="item_description" class="form-control" rows="3" placeholder="Enter item description"></textarea>
+                <textarea id="item_description" name="item_description" class="form-control {% if form.item_description.errors %}is-invalid{% endif %}" rows="3" placeholder="Enter item description">{{ form.item_description.value|default:'' }}</textarea>
+                <div class="invalid-feedback">
+                    {% for error in form.item_description.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
             </div>
             <!-- Item Image -->
             <div class="mb-3">
@@ -26,23 +44,35 @@
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label for="dimension_length" class="form-label">Length (in)</label>
-                <input type="number" id="dimension_length" name="dimension_length" class="form-control" placeholder="e.g., 10" required>
-                <div class="invalid-feedback">Please provide the length.</div>
+                <input type="number" id="dimension_length" name="dimension_length" class="form-control {% if form.dimension_length.errors %}is-invalid{% endif %}" placeholder="e.g., 10" value="{{ form.dimension_length.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                    {% for error in form.dimension_length.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
             </div>
             <div class="col-md-4 mb-3">
                 <label for="dimension_width" class="form-label">Width (in)</label>
-                <input type="number" id="dimension_width" name="dimension_width" class="form-control" placeholder="e.g., 5" required>
-                <div class="invalid-feedback">Please provide the width.</div>
+                <input type="number" id="dimension_width" name="dimension_width" class="form-control {% if form.dimension_width.errors %}is-invalid{% endif %}" placeholder="e.g., 5" value="{{ form.dimension_width.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                    {% for error in form.dimension_width.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
             </div>
             <div class="col-md-4 mb-3">
                 <label for="dimension_height" class="form-label">Height (in)</label>
-                <input type="number" id="dimension_height" name="dimension_height" class="form-control" placeholder="e.g., 15" required>
-                <div class="invalid-feedback">Please provide the height.</div>
+                <input type="number" id="dimension_height" name="dimension_height" class="form-control {% if form.dimension_height.errors %}is-invalid{% endif %}" placeholder="e.g., 15" value="{{ form.dimension_height.value|default:'' }}" required>
+                <div class="invalid-feedback">
+                    {% for error in form.dimension_height.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
         <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary w-100 mb-3">Register Item</button>
+        <button type="submit" class="btn btn-primary w-100 mb-3">Add Item</button>
 
         <!-- Go Back Button -->
         <button type="button" class="btn btn-secondary w-100" onclick="history.back()">Go Back</button>
