@@ -54,7 +54,17 @@
       data-bs-toggle="dropdown"
       aria-expanded="false"
     >
-    <i class="bi bi-person-circle me-2" style="font-size: 1.5rem;"></i>
+    
+    {% if request.user.profile.profile_picture %}
+      <img
+      src="{{ request.user.profile.profile_picture.url }}"
+      alt="Profile pic"
+      class="rounded-circle me-2"
+      style="width: 2rem; height: 2rem; object-fit: cover;"
+    >
+    {% else %}
+      <i class="bi bi-person-circle me-2" style="font-size: 1.5rem;"></i>
+    {% endif %}
       <strong>{{request.user}}</strong>
     </a>
     <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">

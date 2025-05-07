@@ -3,6 +3,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.messages import get_messages
 from .forms import CreateUserForm, ProfileForm, FridgeContentForm
 
 from decimal import Decimal
@@ -36,6 +37,9 @@ def loginPage(request):
 
 def logoutUser(request):
     logout(request)
+    storage = get_messages(request)
+    for _ in storage:
+        pass
     return redirect('LoginPage')
 
 
@@ -136,25 +140,21 @@ def addFridge(request):
 
 @login_required(login_url='heroPage')
 def profilePage(request):
+    user = request.user 
 
-    profile = get_object_or_404(models.UserProfile, user=request.user)
-
-    if request.method == "POST":
-        form = ProfileForm(request.POST, request.FILES, instance=profile)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
-            return redirect('home')
+            messages.success(request, "Profile updated!")
+            return redirect('profilePage')
     else:
-        form = ProfileForm(instance=profile)
+        form = ProfileForm(instance=user)
 
-    context = {
-        'User': User,
+    return render(request, 'profilePage.html', {
         'form': form,
-        'profile': profile,
-    }
-
-    return render(request, 'profilePage.html', context)
-
+        'profile': request.user.profile,
+    })
 
 @login_required(login_url='heroPage')
 def createFamily(request):
