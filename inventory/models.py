@@ -163,6 +163,7 @@ class FridgeContent(models.Model):
     compartment_id = models.ForeignKey(CompartmentsDetails, on_delete=models.CASCADE, related_name="FridgeContent")
     item_id = models.ForeignKey(ItemsDetails, on_delete=models.CASCADE, related_name="FridgeContent")
     quantity = models.PositiveIntegerField(default=1)
+    item_description = models.TextField(null=True, blank=True)
     item_length = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     item_width = models.DecimalField(default=1, max_digits=5, decimal_places=2)
     item_height = models.DecimalField(default=1, max_digits=5, decimal_places=2)
