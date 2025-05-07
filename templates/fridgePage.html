@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
 {% endif %}
 
-<div style="font-size: 17px;">You are currently using {{ user_percent|floatformat:0 }}% of your {{ user_limit_space|floatformat:0 }} limit</div>
+<div style="font-size: 17px;">You are currently using {{ user_percent|floatformat:0 }}% of your {{ user_limit_space|floatformat:0 }} in<sup>3</sup> limit.</div>
 <button type="button" 
   style="margin-top:5px"
   class="btn btn-primary"
