@@ -177,13 +177,13 @@ class FridgeContent(models.Model):
             return self.expiration_date <= timezone.now().date() + datetime.timedelta(days=4)
         return False
 
-    #not implemented yet and will change most likely
+    
     @property
     def volume(self):
         """Calculate the volume of a single item."""
-        if self.item_length and self.item_width and self.item_height:
-            return self.item_length * self.item_width * self.item_height
-        return 0
+        if self.item_length is None or self.item_width is None or self.item_height is None:
+            return 0  # Default to 0 if any dimension is missing
+        return self.item_length * self.item_width * self.item_height
     
     @classmethod
     def items_added_by(cls, member, family):
