@@ -86,10 +86,6 @@ def fridgePage(request, family_id):
     #All fridge contents
     item_list = FridgeContent.objects.filter(family_id=family)
 
-    # Calculate item volume and add it to each item. am working on it. having it here shouldn't affect code
-    for item in item_list:
-        print(item.volume)
-
     #Get user limit ratio
     tag = models.FamilyTag.objects.get(user=request.user, family=family)
     if tag.limit_ratio and request.user != family.owner:
