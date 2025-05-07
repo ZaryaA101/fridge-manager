@@ -1,6 +1,14 @@
-{% extends 'userMain.html' %} {% block loggedInContent %}
+{% extends 'userMain.html' %} 
+{% block loggedInContent %}
 <div class="container mt-5">
     <h1>Add Item to Fridge Content</h1>
+    {% if messages %}
+    <div class="alert alert-danger">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
@@ -8,4 +16,3 @@
     </form>
 </div>
 {% endblock loggedInContent %}
-
