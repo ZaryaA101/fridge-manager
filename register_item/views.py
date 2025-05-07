@@ -8,21 +8,30 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 def register_item(request):
-    #family = request.user.family_set.first() 
-    # fridge = FridgeDetail.objects.get(family_id=family) 
-    # compartments = CompartmentsDetails.objects.filter(family_id=family)
-    # total_items = FridgeContent.objects.filter(family_id=family).count() 
-    # today = date.today()
+    family = request.user.family_set.first() 
+    fridge = FridgeDetail.objects.get(family_id=family) 
+    compartments = CompartmentsDetails.objects.filter(family_id=family)
+    total_items = FridgeContent.objects.filter(family_id=family).count() 
+    today = date.today()
 
-    # if total_items >= fridge.capacity:  
-    #     messages.error(request, "Your fridge is full. Please remove an item before adding more.")
-    #     return redirect('home')  
+    #if total_items >= fridge.capacity:  
+    #    messages.error(request, "Your fridge is full. Please remove an item before adding more.")
+    #    return redirect('home')  
 
     if request.method == "POST":
         form = ItemForm(request.POST, request.FILES)
         if form.is_valid():
+
+            # Check if the item already exists in the database
+            item_name = form.cleaned_data['item_name']  
+            existing_item = ItemsDetails.objects.filter(item_name__iexact=item_name).first() 
+            if existing_item:
+                messages.error(request, f"The item '{item_name}' is already registered in the item registry.")
+                return render(request, "registerItem.html", {"form": form, "today": today, "compartments": compartments})
+        
+            #save the new item
             new_item = form.save(commit=False)
-            #new_item.family_id = family
+            new_item.family_id = family
             new_item.save()
             return redirect('home')
         else:
@@ -30,9 +39,7 @@ def register_item(request):
     else:
         form = ItemForm()
 
-    return render(request, "registerItem.html", {"form": form, 
-                                                 #"today": today, "compartments":compartments,
-                                                })
+    return render(request, "registerItem.html", {"form": form, "today": today, "compartments":compartments,})
 
 
 
