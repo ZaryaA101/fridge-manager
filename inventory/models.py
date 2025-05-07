@@ -24,6 +24,7 @@ class ItemsDetails(models.Model):
     item_name = models.CharField(max_length=200)
     item_image = models.ImageField(upload_to='', default='default.jpeg')
     item_description = models.TextField(null=True, blank=True) 
+    item_quantity = models.PositiveIntegerField(default=1) #check later to see if this is needed at all
     item_expiration = models.DateField(null=True, blank=True)
     item_type = models.CharField(max_length=30, choices = Item_Type_Choices, default='Produce')
     created = models.DateTimeField(auto_now_add=True)
@@ -185,7 +186,14 @@ class FridgeContent(models.Model):
         return cls.objects.filter(compartment_id=compartment, family_id=family)
 
     class Meta:
-        unique_together = ('family_id', 'compartment_id', 'item_id', 'expiration_date')
+        unique_together = (
+            'family_id', 
+            'compartment_id', 
+            'item_id', 
+            'expiration_date', 
+            'quantity', 
+            'item_description'
+            )
         verbose_name = "Fridge Content"
         verbose_name_plural = "Fridge Contents"
 
