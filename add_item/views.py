@@ -113,15 +113,13 @@ def update_item(request, item_id):
                 compartment_id=compartment_id
             )
 
-            # Update the related ItemsDetails object
-            item_details = fridge_item.item_id
-            item_details.item_name = data.get('item_name')
-            item_details.item_description = data.get('item_description')
-            item_details.save()  
+            
 
             # Update the FridgeContent object
+            fridge_item.item_description = data.get('item_description')
             fridge_item.expiration_date = data.get('item_expiration')
-            fridge_item.save()  
+            fridge_item.quantity = data.get('item_count')
+            fridge_item.save() 
 
             return JsonResponse({'success': True})
         except Exception as e:
