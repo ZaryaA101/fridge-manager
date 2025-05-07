@@ -18,7 +18,22 @@ def add_item(request, family_id):
             fridge_item = form.save(commit=False)
             fridge_item.family_id = get_object_or_404(Family, pk=family_id)
             fridge_item.user = request.user
-            
+
+            fridge_item.compartment_id = form.cleaned_data['compartment_id']
+            item = form.cleaned_data['item_id']
+
+            # Check if the item already exists in the compartment
+            existing_item = FridgeContent.objects.filter(
+                family_id=family,
+                compartment_id=fridge_item.compartment_id,
+                item_id=item
+            ).first()
+
+            if existing_item:
+                messages.error(request, f"The item '{item.item_name}' already exists in the compartment '{fridge_item.compartment_id.compartment_name}'.")
+                return render(request, 'addItem.html', {'form': form})
+
+            #check here to see if item is actually having a volume
             item: ItemsDetails = form.cleaned_data['item_id']
             fridge_item.item_length = item.dimension_length
             fridge_item.item_width = item.dimension_width
@@ -30,7 +45,7 @@ def add_item(request, family_id):
                     fridge_item.item_height *
                     fridge_item.quantity
                 )
-
+            
             # Set the default description from ItemsDetails
             fridge_item.item_description = item.item_description
 
@@ -104,35 +119,50 @@ def update_item(request, item_id):
             data = json.loads(request.body)
             family_id = data.get('family_id')
             compartment_id = data.get('compartment_id')
+            item_count = data.get('item_count')
 
             if not family_id or not compartment_id:
                 return JsonResponse({'success': False, 'error': 'Missing required fields'}, status=400)
 
-            # Get the fridge item
+            if not isinstance(item_count, int) or item_count <= 0:
+                return JsonResponse({'success': False, 'error': 'Invalid item count'}, status=400)
+
             fridge_item = get_object_or_404(
                 FridgeContent,
                 item_id=item_id,
                 family_id=family_id,
                 compartment_id=compartment_id
             )
+            compartment = fridge_item.compartment_id
 
-            
+            # Calculate the item volume
+            item_volume = fridge_item.item_length * fridge_item.item_width * fridge_item.item_height
+
+            # Calculate the new occupied volume
+            new_occupied = compartment.occupied + (item_count * item_volume) - (fridge_item.quantity * item_volume)
+
+            if new_occupied > compartment.total_vol:
+                return JsonResponse({'success': False, 'error': 'Updating item count will exceed compartment capacity.'}, status=400)
 
             # Update the FridgeContent object
             fridge_item.item_description = data.get('item_description')
             fridge_item.expiration_date = data.get('item_expiration')
-            fridge_item.quantity = data.get('item_count')
-            fridge_item.save() 
+            fridge_item.quantity = item_count
+            fridge_item.save()
 
-            # Recalculate the occupied volume for the compartment
-            compartment = fridge_item.compartment_id
-            occupied = compartment.occupied
+            # Recalculate the usage ratio dynamically
+            usage_ratio = compartment.usage_ratio
 
-            return JsonResponse({'success': True, 'new_count': fridge_item.quantity, 'occupied': occupied})
+            return JsonResponse({
+                'success': True,
+                'new_count': fridge_item.quantity,
+                'occupied': compartment.occupied,  # This will be calculated dynamically
+                'usage_ratio': usage_ratio
+            })
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
-    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 @csrf_exempt
 def remove_item(request, item_id):
@@ -157,4 +187,5 @@ def remove_item(request, item_id):
             return JsonResponse({'success': False, 'error': 'Item not found in the specified fridge and compartment.'}, status=404)
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
+
 
