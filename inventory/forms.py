@@ -48,7 +48,6 @@ class ProfileForm(forms.ModelForm):
         return cleaned
 
     def save(self, commit=True):
-        # 1) Save the User object
         user = super().save(commit=False)
         new_pw = self.cleaned_data.get('new_password')
         if new_pw:
@@ -56,7 +55,6 @@ class ProfileForm(forms.ModelForm):
         if commit:
             user.save()
 
-        # 2) Now save the picture onto the UserProfile
         profile_pic = self.cleaned_data.get('profile_picture')
         profile, _ = UserProfile.objects.get_or_create(user=user)
         if profile_pic:
