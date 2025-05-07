@@ -6,7 +6,6 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.utils.timezone import now
 from django.contrib.auth import get_user_model
-from .models import FridgeDetail, FridgeContent
 import atexit
 import logging
 
@@ -14,6 +13,7 @@ logger = logging.getLogger(__name__)
 scheduler = BackgroundScheduler()
 
 def check_fridge_capacity():
+    from .models import FridgeDetail, FridgeContent
     threshold = settings.FRIDGE_WARNING_THRESHOLD
     fridges = FridgeDetail.objects.all()
 
