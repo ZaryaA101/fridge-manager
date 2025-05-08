@@ -200,6 +200,14 @@ function showItemDetails(imageElement) {
     const compartmentCapacity = parseFloat(imageElement.getAttribute('data-compartment-capacity'));
     const itemVolume = parseFloat(imageElement.getAttribute('data-item-volume')) || 0;
     let compartmentOccupied = parseFloat(imageElement.getAttribute('data-compartment-occupied')) || 0;
+    const familyId = '{{ family.family_id }}';
+
+    // Update the "Remove" button's onclick handler
+    const removeButton = document.querySelector('.remove-btn');
+    removeButton.setAttribute(
+        'onclick',
+        `removeItem('${itemId}', '${compartmentId}', '${familyId}')`
+    );
 
     // Validate and update the compartment's occupied value
     const compartmentHeader = document.getElementById(`compartment-${compartmentId}`);
