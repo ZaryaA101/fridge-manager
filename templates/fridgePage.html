@@ -661,6 +661,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <button 
                     type="button" 
                     class="btn-circle minus-btn" 
+                    onclick="increaseCount()"
                     onmousedown="startDecreasing()" 
                     onmouseup="stopChanging()" 
                     onmouseleave="stopChanging()">-</button>
@@ -673,6 +674,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <button 
                     type="button" 
                     class="btn-circle plus-btn" 
+                    onclick="decreaseCount()"
                     onmousedown="startIncreasing()" 
                     onmouseup="stopChanging()" 
                     onmouseleave="stopChanging()">+</button>
