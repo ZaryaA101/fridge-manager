@@ -153,16 +153,25 @@ def update_item(request, item_id):
             # Recalculate the usage ratio dynamically
             usage_ratio = compartment.usage_ratio
 
+            # Calculate updated fridge usage
+            family = get_object_or_404(Family, pk=family_id)
+            total_volume = family.total_volume
+            occupied_volume = family.occupied_volume
+            usage_percent = (occupied_volume / total_volume * 100) if total_volume > 0 else 0
+
             return JsonResponse({
                 'success': True,
                 'new_count': fridge_item.quantity,
-                'occupied': compartment.occupied,  # This will be calculated dynamically
-                'usage_ratio': usage_ratio
+                'occupied': compartment.occupied,  
+                'usage_ratio': usage_ratio,
+                'total_volume': total_volume,
+                'usage_percent': usage_percent
             })
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
+
 
 @csrf_exempt
 def remove_item(request, item_id):
