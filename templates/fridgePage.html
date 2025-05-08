@@ -330,6 +330,15 @@ function showItemDetails(imageElement) {
                 itemElement.setAttribute('data-count', updatedCount);
             }
 
+            // Update the fridge's overall usage
+            const progressBar = document.querySelector('.progress-bar');
+            if (progressBar) {
+                const usagePercent = parseFloat(data.usage_percent) || 0;
+                progressBar.style.width = `${usagePercent}%`;
+                progressBar.setAttribute('aria-valuenow', usagePercent);
+                progressBar.textContent = `${usagePercent.toFixed(0)}% Full`;
+            }
+          
             // Close the edit popup and return to the details view
             hideItemDetails();
         } else {
