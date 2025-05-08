@@ -397,7 +397,24 @@ document.addEventListener('DOMContentLoaded', function () {
                   if (itemElement) {
                       itemElement.closest('.Item').remove();
                   }
-
+                  // Update the compartment's capacity and usage ratio
+                  const compartmentHeader = document.getElementById(`compartment-${compartmentIdToRemove}`);
+                  if (compartmentHeader) {
+                      compartmentHeader.setAttribute('data-occupied', data.occupied_volume);
+                      const totalVol = parseFloat(compartmentHeader.getAttribute('data-total-vol')) || 1;
+                      const usageRatio = (parseFloat(data.occupied_volume) / totalVol) * 100;
+                      const compartmentName = compartmentHeader.getAttribute('data-compartment-name');
+                      compartmentHeader.textContent = `${compartmentName} ${usageRatio.toFixed(0)}%`;
+                  } 
+      
+                  // Update the fridge's overall usage
+                  const progressBar = document.querySelector('.progress-bar');
+                  if (progressBar) {
+                      const usagePercent = parseFloat(data.usage_percent) || 0;
+                      progressBar.style.width = `${usagePercent}%`;
+                      progressBar.setAttribute('aria-valuenow', usagePercent);
+                      progressBar.textContent = `${usagePercent.toFixed(0)}% Full`;
+                  } 
                   // Close the item details popup and confirmation modal
                   hideItemDetails();
                   const removeItemModal = bootstrap.Modal.getInstance(document.getElementById('removeItemModal'));
