@@ -182,7 +182,20 @@ def remove_item(request, item_id):
                 compartment_id=compartment_id
             )
             fridge_item.delete()
-            return JsonResponse({'success': True, 'message': 'Item removed successfully.'})
+
+            # Calculate updated fridge usage
+            family = get_object_or_404(Family, pk=family_id)
+            total_volume = family.total_volume
+            occupied_volume = family.occupied_volume
+            usage_percent = (occupied_volume / total_volume * 100) if total_volume > 0 else 0
+
+            return JsonResponse({
+                'success': True,
+                'message': 'Item removed successfully.',
+                'occupied_volume': occupied_volume,
+                'total_volume': total_volume,
+                'usage_percent': usage_percent
+            })
         except FridgeContent.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Item not found in the specified fridge and compartment.'}, status=404)
     else:
