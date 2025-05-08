@@ -53,10 +53,13 @@
   .hidden {
       display: none; /* hide elements */
   }
+
+
   
   .form-group {
       margin-bottom: 15px; /* Add spacing between fields */
   }
+
 
   /* for styling popup */
   .form-group label {
@@ -126,6 +129,8 @@
 </style>
 
 
+
+
 <style>
   /* for the circular buttons for item count edit */
   .count-control {
@@ -166,57 +171,58 @@
 }
 </style>
 
+
 <script>
 function showItemDetails(imageElement) {
+    // Reset any warnings or intervals
+    const warningElement = document.getElementById('capacity-warning');
+    warningElement.style.display = 'none';
+    clearInterval(intervalId);
+
+    // Reset the edit form to its default state
+    const form = document.getElementById('edit-item-form');
+    form.reset(); // Reset the form fields
+    form.removeAttribute('data-id');
+    form.removeAttribute('data-compartment-id');
+    form.removeAttribute('data-compartment-capacity');
+    form.removeAttribute('data-compartment-occupied');
+    form.removeAttribute('data-item-volume');
+    form.removeAttribute('data-original-description');
+    form.removeAttribute('data-original-count');
+
+    // Populate the new item's details
     const itemId = imageElement.getAttribute('data-id');
     const itemName = imageElement.getAttribute('data-name');
     const itemDescription = imageElement.getAttribute('data-description');
     const itemCount = imageElement.getAttribute('data-count');
     const itemExpiration = imageElement.getAttribute('data-expiration');
     const compartmentId = imageElement.getAttribute('data-location');
-    const familyId = '{{ family.family_id }}'; 
-
-    // Retrieve compartment capacity and occupied values (pass these from the backend)
     const compartmentCapacity = parseFloat(imageElement.getAttribute('data-compartment-capacity'));
-    const compartmentOccupied = parseFloat(imageElement.getAttribute('data-compartment-occupied'));
+    const itemVolume = parseFloat(imageElement.getAttribute('data-item-volume')) || 0;
+    let compartmentOccupied = parseFloat(imageElement.getAttribute('data-compartment-occupied')) || 0;
 
-    // Set the compartmentId in the form for later use
-    const form = document.getElementById('edit-item-form');
+    // Validate and update the compartment's occupied value
+    const compartmentHeader = document.getElementById(`compartment-${compartmentId}`);
+    if (compartmentHeader) {
+        compartmentOccupied = parseFloat(compartmentHeader.getAttribute('data-occupied')) || 0;
+    }
+
     form.setAttribute('data-id', itemId);
     form.setAttribute('data-compartment-id', compartmentId);
     form.setAttribute('data-compartment-capacity', compartmentCapacity);
     form.setAttribute('data-compartment-occupied', compartmentOccupied);
-
-    // Update the popup title with the item's name
-    document.getElementById('popup-title').textContent = itemName;
-
-    console.log('showdetails Item ID:', itemId);
-    console.log('showdetails Compartment ID:', compartmentId);
-    console.log('showdetails Family ID:', familyId);
-
-    // Store the original description as a data attribute on the form
+    form.setAttribute('data-item-volume', itemVolume);
     form.setAttribute('data-original-description', itemDescription);
     form.setAttribute('data-original-count', itemCount);
 
-    // Update the "Remove" button's onclick handler
-    const removeButton = document.querySelector('.remove-btn');
-    removeButton.setAttribute(
-        'onclick',
-        `removeItem('${itemId}', '${compartmentId}', '${familyId}')`
-    );
-
-    // Populate the details popup with the latest data
-    
+    // Update the popup title and fields
+    document.getElementById('popup-title').textContent = itemName;
     document.getElementById('item-description').textContent = `Description: ${itemDescription}`;
     document.getElementById('item-expiration').textContent = `Expiration Date: ${itemExpiration}`;
     document.getElementById('item-count').textContent = `Count: ${itemCount}`;
-
-
-    // Populate the edit form with the latest data
-    
     document.getElementById('edit-item-description').value = itemDescription;
     document.getElementById('edit-item-expiration').value = itemExpiration;
-    document.getElementById('edit-item-count').value = itemCount; 
+    document.getElementById('edit-item-count').value = itemCount;
 
     // Show the item details popup
     const detailsPopup = document.getElementById('item-details');
@@ -224,7 +230,9 @@ function showItemDetails(imageElement) {
     document.getElementById('details-view').classList.remove('hidden');
     document.getElementById('edit-view').classList.add('hidden');
 }
+</script>
 
+<script>
   function hideItemDetails() {
       // Hides the item details popup block
       const detailsPopup = document.getElementById('item-details');
@@ -256,23 +264,11 @@ function showItemDetails(imageElement) {
 
     const form = document.getElementById('edit-item-form');
     const itemId = form.getAttribute('data-id');
-    const compartmentId = form.getAttribute('data-compartment-id'); // Retrieve the compartmentId
-    const updatedName = document.getElementById('popup-title').textContent;
+    const compartmentId = form.getAttribute('data-compartment-id');
+    const updatedCount = parseInt(document.getElementById('edit-item-count').value, 10);
     const updatedDescription = document.getElementById('edit-item-description').value;
     const updatedExpiration = document.getElementById('edit-item-expiration').value;
-    const updatedCount = parseInt(document.getElementById('edit-item-count').value, 10);
     const familyId = '{{ family.family_id }}';
-    const volume = parseFloat(form.getAttribute('data-item-volume')); // Retrieve the item volume
-
-
-    if (isNaN(updatedCount) || updatedCount <= 0) {
-        alert('Invalid item count. Please enter a valid number greater than 0.');
-        return;
-    }
-
-    console.log('Submitting volume Count:', volume); // Debugging
-    console.log('Submitting Updated Count:', updatedCount); // Debugging
-
 
     fetch(`/addItem/update-item/${itemId}/`, {
         method: 'POST',
@@ -281,258 +277,161 @@ function showItemDetails(imageElement) {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
         body: JSON.stringify({
-            item_name: updatedName,
             item_description: updatedDescription,
             item_expiration: updatedExpiration,
-            family_id: familyId,
             item_count: updatedCount,
-            compartment_id: compartmentId, // Include compartmentId in the request
+            family_id: familyId,
+            compartment_id: compartmentId
         }),
     })
     .then(response => response.json())
     .then(data => {
+        const errorElement = document.getElementById('update-error');
         if (data.success) {
+            // Hide the error message if it was previously displayed
+            errorElement.style.display = 'none';
 
-          // Update the compartment's occupied value
-        const compartmentHeader = document.getElementById(`compartment-${compartmentId}`);
-        if (compartmentHeader) {
-            compartmentHeader.setAttribute('data-occupied', data.occupied);
+            // Update the form's original count and occupied attributes
+            form.setAttribute('data-original-count', updatedCount);
+            form.setAttribute('data-compartment-occupied', data.occupied); 
 
-            // Recalculate and update the usage ratio
-            const totalVol = parseFloat(compartmentHeader.getAttribute('data-total-vol')) || 1;
-            const usageRatio = (data.occupied / totalVol) * 100;
-            const compartmentName = compartmentHeader.getAttribute('data-compartment-name');
-            compartmentHeader.textContent = `${compartmentName} ${usageRatio.toFixed(0)}%`;
-        }
-
-          // Update the UI with the new values
-          const itemElement = document.querySelector(`img[data-id="${itemId}"][data-location="${compartmentId}"]`);
-          if (itemElement) 
-          {
-            
-            // Update the data attributes
-            itemElement.setAttribute('data-name', updatedName);
-            itemElement.setAttribute('data-description', updatedDescription);
-            itemElement.setAttribute('data-expiration', updatedExpiration);
-            itemElement.setAttribute('data-count', updatedCount);
-            // Update the badge displaying the item count
-            const badgeElement = itemElement.closest('.Item').querySelector('.badge');
-            if (badgeElement) 
-            {
-              badgeElement.textContent = updatedCount;
+            // Update the compartment's usage ratio in the DOM
+            const compartmentHeader = document.getElementById(`compartment-${compartmentId}`);
+            if (compartmentHeader) {
+                compartmentHeader.setAttribute('data-occupied', data.occupied); // Update the DOM attribute
+                const totalVol = parseFloat(compartmentHeader.getAttribute('data-total-vol')) || 1;
+                const usageRatio = (data.occupied / totalVol) * 100;
+                const compartmentName = compartmentHeader.getAttribute('data-compartment-name');
+                compartmentHeader.textContent = `${compartmentName} ${usageRatio.toFixed(0)}%`;
             }
-          }
-          // Update the details view if it's currently open
-        
-          document.getElementById('item-description').textContent = `Description: ${updatedDescription}`;
-          document.getElementById('item-expiration').textContent = `Expiration Date: ${new Date(updatedExpiration).toLocaleDateString()}`;
-          document.getElementById('item-count').textContent = `Count: ${updatedCount}`;
 
-            hideItemDetails(); // Close the popup
+            // Update the item count in the item details popup
+            document.getElementById('item-count').textContent = `Count: ${updatedCount}`;
+
+            // Update the item count in the edit item popup
+            const itemElement = document.querySelector(`img[data-id="${itemId}"][data-location="${compartmentId}"]`);
+            if (itemElement) {
+                const badgeElement = itemElement.closest('.Item').querySelector('.badge');
+                if (badgeElement) {
+                    badgeElement.textContent = updatedCount;
+                }
+
+                // Update the DOM attributes of the <img> element
+                itemElement.setAttribute('data-description', updatedDescription);
+                itemElement.setAttribute('data-expiration', updatedExpiration);
+                itemElement.setAttribute('data-count', updatedCount);
+            }
+
+            // Close the edit popup and return to the details view
+            hideItemDetails();
         } else {
-            alert(`Failed to update item: ${data.error}`);
+            
+            errorElement.textContent = `Failed to update item: ${data.error}`;
+            errorElement.style.display = 'block';
         }
     })
-    .catch(error => console.error('Error:', error));
-}
-
-
-
-// item removal function
-document.addEventListener('DOMContentLoaded', function () {
-  
-    let itemIdToRemove = null; 
-    let compartmentIdToRemove = null; 
-    let familyIdToRemove = null; 
-
-    // Function to trigger the confirmation modal
-    function removeItem(itemId, compartmentId, familyId) {
-        if (!itemId || !compartmentId || !familyId) {
-            console.error('Missing parameters for item removal:', { itemId, compartmentId, familyId });
-            alert('Failed to remove item: Missing required parameters.');
-            return;
-        }
-        
-        // Store the IDs for later use
-        itemIdToRemove = itemId;
-        compartmentIdToRemove = compartmentId;
-        familyIdToRemove = familyId;
-
-        // Show the confirmation
-        const removeItemModal = new bootstrap.Modal(document.getElementById('removeItemModal'));
-        removeItemModal.show();
-    }
-    
-    // Event listener for the confirmation button
-    document.getElementById('confirmRemoveItem').addEventListener('click', function () {
-        
-        if (itemIdToRemove && compartmentIdToRemove && familyIdToRemove) {
-            
-            const confirmRemoveButton = document.getElementById('confirmRemoveItem');
-            confirmRemoveButton.disabled = true; // Disable the button during the request
-
-            fetch(`/addItem/remove-item/${encodeURIComponent(itemIdToRemove)}/?compartment_id=${encodeURIComponent(compartmentIdToRemove)}&family_id=${encodeURIComponent(familyIdToRemove)}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Remove the item from the DOM
-                    const itemElement = document.querySelector(`img[data-id="${itemIdToRemove}"][data-location="${compartmentIdToRemove}"]`);
-                    if (itemElement) {
-                        itemElement.closest('.Item').remove();
-                    }
-                    // Close the item details popup and confirmation modal
-                    hideItemDetails();
-                    const removeItemModal = bootstrap.Modal.getInstance(document.getElementById('removeItemModal'));
-                    removeItemModal.hide();
-
-                    // Show the success 
-                    const successToast = new bootstrap.Toast(document.getElementById('successToast'));
-                    successToast.show();
-
-                    // Reset the stored IDs
-                    itemIdToRemove = null;
-                    compartmentIdToRemove = null;
-                    familyIdToRemove = null;
-
-                    // Check if the fridge is empty and update the UI
-                    const remainingItems = document.querySelectorAll('.Item');
-                    if (remainingItems.length === 0) {
-                        document.querySelector('.container').innerHTML = '<p class="fs-5">There are no items in the fridge.</p>';
-                    }
-                } else {
-                    alert("Failed to remove item: " + data.error);
-                }
-            })
-            .catch(error => {
-                console.error("Error removing item:", error);
-                alert("An error occurred while removing the item.");
-            })
-            .finally(() => {
-                confirmRemoveButton.disabled = false; // Re-enable the button
-            });
-        }
+    .catch(error => {
+        console.error('Error:', error);
+        const errorElement = document.getElementById('update-error');
+        errorElement.textContent = 'An unexpected error occurred. Please try again.';
+        errorElement.style.display = 'block';
     });
-
-    window.removeItem = removeItem;
-});
-
-</script>
-
-
-<script>
-function increaseCount() {
-    const countInput = document.getElementById('edit-item-count');
-    const currentValue = parseInt(countInput.value, 10) || 0;
-
-    // Retrieve the compartment's total capacity and current usage
-    const form = document.getElementById('edit-item-form');
-    const compartmentCapacity = parseFloat(form.getAttribute('data-compartment-capacity'));
-    const compartmentOccupied = parseFloat(form.getAttribute('data-compartment-occupied'));
-    const itemVolume = parseFloat(form.getAttribute('data-item-volume'));
-
-    // Calculate the new total usage after the update
-    const newUsage = compartmentOccupied + (currentValue + 1) * itemVolume - currentValue * itemVolume;
-
-    // Check if the new usage exceeds the capacity
-    const warningElement = document.getElementById('capacity-warning');
-    if (newUsage > compartmentCapacity) {
-        warningElement.style.display = 'block'; 
-        return; 
-    } else {
-        warningElement.style.display = 'none'; 
-    }
-
-    countInput.value = currentValue + 1;
 }
-
-function decreaseCount() {
-    const countInput = document.getElementById('edit-item-count');
-    const currentValue = parseInt(countInput.value, 10) || 0;
-
-    if (currentValue > 1) {
-        countInput.value = currentValue - 1;
-
-        
-        const warningElement = document.getElementById('capacity-warning');
-        warningElement.style.display = 'none';
-    }
-}
-
-// irl validation for manual input
-document.getElementById('edit-item-count').addEventListener('input', function () {
-    const countInput = document.getElementById('edit-item-count');
-    const currentValue = parseInt(countInput.value, 10) || 0;
-
-    const form = document.getElementById('edit-item-form');
-    const compartmentCapacity = parseFloat(form.getAttribute('data-compartment-capacity'));
-    const compartmentOccupied = parseFloat(form.getAttribute('data-compartment-occupied'));
-    const itemVolume = parseFloat(form.getAttribute('data-item-volume'));
-
-    const newUsage = compartmentOccupied + currentValue * itemVolume;
-
-    const warningElement = document.getElementById('capacity-warning');
-    if (newUsage > compartmentCapacity) {
-        warningElement.style.display = 'block';
-    } else {
-        warningElement.style.display = 'none';
-    }
-});
 </script>
 
 <script>
-// Start and stop interval for button hold
-let intervalId;
-
-function startIncreasing() {
-    intervalId = setInterval(increaseCount, 100); 
-}
-
-function startDecreasing() {
-    intervalId = setInterval(decreaseCount, 100); 
-}
-
-function stopChanging() {
-    clearInterval(intervalId); 
-}
-document.addEventListener('mouseup', stopChanging);
-</script>
-
-
-
-<script>
-  //updates compartment usage
-  function updateCompartmentUsageLocally(compartmentId, itemVolumeChange) {
-    // Get the compartment header element
-    const compartmentHeader = document.getElementById(`compartment-${compartmentId}`);
-    if (!compartmentHeader) {
-        console.error(`Compartment with ID ${compartmentId} not found.`);
-        return;
-    }
-
-    // Retrieve the current occupied volume
-    let occupied = parseFloat(compartmentHeader.getAttribute('data-occupied')) || 0;
-
-    // Update the occupied volume
-    occupied += itemVolumeChange;
-    compartmentHeader.setAttribute('data-occupied', occupied);
-
-    // Recalculate the usage ratio
-    const totalVol = parseFloat(compartmentHeader.getAttribute('data-total-vol')) || 1; // Avoid division by zero
-    const usageRatio = (occupied / totalVol) * 100;
-
-    // Update the text content of the <h3> element
-    const compartmentName = compartmentHeader.getAttribute('data-compartment-name');
-    compartmentHeader.textContent = `${compartmentName} ${isNaN(usageRatio) ? 0 : usageRatio.toFixed(0)}%`;
-}
+  function increaseCount() {
+      const countInput = document.getElementById('edit-item-count');
+      const currentValue = parseInt(countInput.value, 10) || 0;
+  
+      const form = document.getElementById('edit-item-form');
+      const compartmentCapacity = parseFloat(form.getAttribute('data-compartment-capacity')) || 0;
+      let compartmentOccupied = parseFloat(form.getAttribute('data-compartment-occupied')) || 0;
+      const itemVolume = parseFloat(form.getAttribute('data-item-volume')) || 0;
+  
+      if (itemVolume === 0) {
+          console.error('Item volume is invalid or missing.');
+          return;
+      }
+  
+      const newOccupied = compartmentOccupied + itemVolume;
+  
+      const warningElement = document.getElementById('capacity-warning');
+      if (newOccupied > compartmentCapacity) {
+          warningElement.style.display = 'block';
+          return;
+      } else {
+          warningElement.style.display = 'none';
+      }
+  
+      countInput.value = currentValue + 1;
+      compartmentOccupied = newOccupied;
+      form.setAttribute('data-compartment-occupied', compartmentOccupied);
+  }
+  
+  function decreaseCount() {
+      const countInput = document.getElementById('edit-item-count');
+      const currentValue = parseInt(countInput.value, 10) || 0;
+  
+      const form = document.getElementById('edit-item-form');
+      const compartmentCapacity = parseFloat(form.getAttribute('data-compartment-capacity')) || 0;
+      let compartmentOccupied = parseFloat(form.getAttribute('data-compartment-occupied')) || 0;
+      const itemVolume = parseFloat(form.getAttribute('data-item-volume')) || 0;
+      //debug in case
+      if (itemVolume === 0) {
+          console.error('Item volume is invalid or missing.');
+          return;
+      }
+  
+      const newOccupied = compartmentOccupied - itemVolume;
+  
+      const warningElement = document.getElementById('capacity-warning');
+      if (newOccupied < 0) {
+          //debug incase
+          console.error('Occupied volume cannot be negative.');
+          return;
+      } else {
+          warningElement.style.display = 'none';
+      }
+  
+      if (currentValue > 1) {
+          countInput.value = currentValue - 1;
+          compartmentOccupied = newOccupied;
+          form.setAttribute('data-compartment-occupied', compartmentOccupied);
+      } else {
+          //won't happen but debug in case
+          console.warn('Item count cannot be less than 1.');
+      }
+  }
+  
+  // Start and stop interval for button hold
+  let intervalId;
+  
+  function startIncreasing() {
+      intervalId = setInterval(increaseCount, 100);
+  }
+  
+  function startDecreasing() {
+      intervalId = setInterval(decreaseCount, 100);
+  }
+  
+  function stopChanging() {
+      clearInterval(intervalId);
+  }
+  
+  document.addEventListener('mouseup', stopChanging);
   </script>
 
 
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const countInput = document.getElementById('edit-item-count');
+      if (countInput) {
+          // Ensure the input field is read-only
+          countInput.setAttribute('readonly', true);
+      }
+  });
+  </script>
 
 
 <div class="pd-4">
@@ -637,55 +536,61 @@ document.addEventListener('mouseup', stopChanging);
           <p id="item-count"></p>
           <p id="item-location" ></p>
           
+          
           <button class="edit-btn" onclick="showEditForm()">Edit</button>
           <button class="remove-btn btn btn-secondary" onclick="removeItem()">Remove</button>
         </div>
-        
-        <!-- Edit Item Form  maybe error pops up here-->
+
+        <!-- Edit Item Form -->
         <div id="edit-view" class="hidden">
-          <form id="edit-item-form" 
-      data-id="{{ item.item_id.item_id }}" 
-      data-compartment-id="{{ item.compartment_id.compartment_id }}" 
-      data-item-volume="{{ item.volume }}"
-      onsubmit="submitEditForm(event)">
-
-            {% csrf_token %}
-            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-            <div class="form-group">
-              <label for="edit-item-description">Description:</label>
-              <textarea id="edit-item-description" name="item_description" required></textarea>
-            </div>
-      
-            <div class="form-group">
-              <label for="edit-item-expiration">Expiration Date:</label>
-              <input type="date" id="edit-item-expiration" name="item_expiration" required>
-            </div>
-    
-            <div class="form-group">
-              <label for="edit-item-count">Count:</label>
-              <div class="count-control">
-                <button 
-                  type="button" 
-                  class="btn-circle minus-btn" 
-                  onmousedown="startDecreasing()" 
-                  onmouseup="stopChanging()" 
-                  onmouseleave="stopChanging()">-</button>
-                <input type="number" id="edit-item-count" name="item_count" min="1" required>
-                <button 
-                  type="button" 
-                  class="btn-circle plus-btn" 
-                  onmousedown="startIncreasing()" 
-                  onmouseup="stopChanging()" 
-                  onmouseleave="stopChanging()">+</button>
-              </div>
-              <!-- Warning message for exceeding capacity -->
-              <p id="capacity-warning" style="color: red; display: none;">Cannot update item count because doing so will exceed compartment capacity.</p>
-            </div>
-
-            <button type="submit" class="save-btn">Save</button>
-            <button type="button" class="cancel-btn" onclick="cancelEdit()">Cancel</button>
-          </form>
+    <form id="edit-item-form" 
+          data-id="{{ item.item_id.item_id }}" 
+          data-compartment-id="{{ item.compartment_id.compartment_id }}" 
+          data-item-volume="{{ item.volume }}"
+          onsubmit="submitEditForm(event)">
+        {% csrf_token %}
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <div class="form-group">
+            <label for="edit-item-description">Description:</label>
+            <textarea id="edit-item-description" name="item_description" required></textarea>
         </div>
+        <div class="form-group">
+            <label for="edit-item-expiration">Expiration Date:</label>
+            <input type="date" id="edit-item-expiration" name="item_expiration" required>
+        </div>
+        <div class="form-group">
+            <label for="edit-item-count">Count:</label>
+            <div class="count-control">
+                <button 
+                    type="button" 
+                    class="btn-circle minus-btn" 
+                    onmousedown="startDecreasing()" 
+                    onmouseup="stopChanging()" 
+                    onmouseleave="stopChanging()">-</button>
+                <input 
+                    type="number" 
+                    id="edit-item-count" 
+                    name="item_count" 
+                    min="1" 
+                    readonly> <!-- Make the input field read-only -->
+                <button 
+                    type="button" 
+                    class="btn-circle plus-btn" 
+                    onmousedown="startIncreasing()" 
+                    onmouseup="stopChanging()" 
+                    onmouseleave="stopChanging()">+</button>
+            </div>
+            <div class="alert alert-danger mt-2" id="capacity-warning" style="display: none;">
+                Cannot update item count because doing so will exceed compartment capacity.
+            </div>
+        </div>
+        <div class="alert alert-danger mt-2" id="update-error" style="display: none;">
+            Failed to update item because count would exceed compartment capacity.
+        </div>
+        <button type="submit" class="save-btn">Save</button>
+        <button type="button" class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+    </form>
+</div>
       </div>
 
       <!-- Remove Item Confirmation -->
@@ -727,5 +632,6 @@ document.addEventListener('mouseup', stopChanging);
   </div>
   
   {% endblock loggedInContent %}
+
 
 
