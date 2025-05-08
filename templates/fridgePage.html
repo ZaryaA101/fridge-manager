@@ -345,6 +345,95 @@ function showItemDetails(imageElement) {
         errorElement.style.display = 'block';
     });
 }
+
+
+  
+
+// item removal functionionality
+document.addEventListener('DOMContentLoaded', function () {
+  
+  let itemIdToRemove = null; 
+  let compartmentIdToRemove = null; 
+  let familyIdToRemove = null; 
+
+  // Function to trigger the confirmation modal
+  function removeItem(itemId, compartmentId, familyId) {
+      if (!itemId || !compartmentId || !familyId) {
+          console.error('Missing parameters for item removal:', { itemId, compartmentId, familyId });
+          alert('Failed to remove item: Missing required parameters.');
+          return;
+      }
+      
+      // Store the IDs for later use
+      itemIdToRemove = itemId;
+      compartmentIdToRemove = compartmentId;
+      familyIdToRemove = familyId;
+
+      // Show the confirmation
+      const removeItemModal = new bootstrap.Modal(document.getElementById('removeItemModal'));
+      removeItemModal.show();
+  }
+  
+  // Event listener for the confirmation button
+  document.getElementById('confirmRemoveItem').addEventListener('click', function () {
+      
+      if (itemIdToRemove && compartmentIdToRemove && familyIdToRemove) {
+          
+          const confirmRemoveButton = document.getElementById('confirmRemoveItem');
+          confirmRemoveButton.disabled = true; // Disable the button during the request
+
+          fetch(`/addItem/remove-item/${encodeURIComponent(itemIdToRemove)}/?compartment_id=${encodeURIComponent(compartmentIdToRemove)}&family_id=${encodeURIComponent(familyIdToRemove)}`, {
+              method: 'DELETE',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+              },
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  // Remove the item from the DOM
+                  const itemElement = document.querySelector(`img[data-id="${itemIdToRemove}"][data-location="${compartmentIdToRemove}"]`);
+                  if (itemElement) {
+                      itemElement.closest('.Item').remove();
+                  }
+
+                  // Close the item details popup and confirmation modal
+                  hideItemDetails();
+                  const removeItemModal = bootstrap.Modal.getInstance(document.getElementById('removeItemModal'));
+                  removeItemModal.hide();
+
+                  // Show the success 
+                  const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+                  successToast.show();
+
+                  // Reset the stored IDs
+                  itemIdToRemove = null;
+                  compartmentIdToRemove = null;
+                  familyIdToRemove = null;
+
+                  // Check if the fridge is empty and update the UI
+                  const remainingItems = document.querySelectorAll('.Item');
+                  if (remainingItems.length === 0) {
+                      document.querySelector('.container').innerHTML = '<p class="fs-5">There are no items in the fridge.</p>';
+                  }
+              } else {
+                  alert("Failed to remove item: " + data.error);
+              }
+          })
+          .catch(error => {
+              console.error("Error removing item:", error);
+              alert("An error occurred while removing the item.");
+          })
+          .finally(() => {
+              confirmRemoveButton.disabled = false; // Re-enable the button
+          });
+      }
+  });
+
+  window.removeItem = removeItem;
+});
+  
 </script>
 
 <script>
