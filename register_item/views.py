@@ -13,6 +13,11 @@ def register_item(request):
     compartments = CompartmentsDetails.objects.filter(family_id=family)
     total_items = FridgeContent.objects.filter(family_id=family).count() 
     today = date.today()
+    #check if the current user is the owner of the family
+    if family.owner == request.user:
+        is_owner = True
+    else:
+        is_owner = False
 
     #if total_items >= fridge.capacity:  
     #    messages.error(request, "Your fridge is full. Please remove an item before adding more.")
@@ -27,7 +32,7 @@ def register_item(request):
             existing_item = ItemsDetails.objects.filter(item_name__iexact=item_name).first() 
             if existing_item:
                 messages.error(request, f"The item '{item_name}' is already registered in the item registry.")
-                return render(request, "registerItem.html", {"form": form, "today": today, "compartments": compartments})
+                return render(request, "registerItem.html", {"form": form, "today": today, "compartments": compartments,"is_owner": is_owner})
         
             #save the new item
             new_item = form.save(commit=False)
@@ -39,12 +44,13 @@ def register_item(request):
     else:
         form = ItemForm()
 
-    return render(request, "registerItem.html", {"form": form, "today": today, "compartments":compartments,})
+    return render(request, "registerItem.html", {"form": form, "today": today, "compartments":compartments,"is_owner": is_owner})
 
 
 
 @csrf_exempt
 def unregister_item(request):
+    
     if request.method == 'POST':
         item_id = request.POST.get('item_id')  # Get item_id from the form
         try:
@@ -60,6 +66,13 @@ def unregister_item(request):
     return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=400)
 
 def unregister_item_page(request):
+    family = request.user.family_set.first()
+    #check if the current user is the owner of the family
+    if family.owner == request.user:
+        is_owner = True
+    else:
+        is_owner = False
     # gets all availble items in the database
     items = ItemsDetails.objects.all()
-    return render(request, 'unregisteritem.html', {'items': items})
+    return render(request, 'unregisteritem.html', {'items': items, 'is_owner': is_owner})
+
