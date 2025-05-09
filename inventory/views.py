@@ -130,11 +130,21 @@ def fridgePage(request, family_id):
   
 @login_required(login_url='heroPage')
 def home(request):
+
+    family = request.user.family_set.first()
+    #check if the current user is the owner of the family
+    if family.owner == request.user:
+        is_owner = True
+    else:
+        is_owner = False
+    
     families = models.Family.objects.filter(FamilyTag__user=request.user)
     family_users = models.FamilyTag.objects.filter(family_id__in=families)
+    
     context = {
         "family_users": family_users,
         "families": families,
+        "is_owner": is_owner,
         
     }
     return render(request, "home.html", context=context)
@@ -142,9 +152,16 @@ def home(request):
 
 @login_required(login_url='heroPage')
 def addFridge(request):
+    family = request.user.family_set.first()
+    #check if the current user is the owner of the family
+    if family.owner == request.user:
+        is_owner = True
+    else:
+        is_owner = False
     fridge_list=1
     context = {
         "fridge_list": fridge_list,
+        "is_owner": is_owner,
     }
     return render(request, "addFridge.html", context=context)
 
@@ -152,7 +169,12 @@ def addFridge(request):
 @login_required(login_url='heroPage')
 def profilePage(request):
     user = request.user 
-
+    family = user.family_set.first()
+    #check if the current user is the owner of the family
+    if family.owner == request.user:
+        is_owner = True
+    else:
+        is_owner = False
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
@@ -165,13 +187,21 @@ def profilePage(request):
     return render(request, 'profilePage.html', {
         'form': form,
         'profile': request.user.profile,
+        'is_owner': is_owner,
     })
 
 @login_required(login_url='heroPage')
 def createFamily(request):
+    family = request.user.family_set.first()
+    #check if the current user is the owner of the family
+    if family.owner == request.user:
+        is_owner = True
+    else:
+        is_owner = False
     if request.method == 'POST':
         family_name = request.POST.get('family_name', '').strip()
- 
+
+        
         # Owner default to logged in user
         owner_id = request.POST.get('owner')
         if owner_id:
@@ -254,7 +284,7 @@ def createFamily(request):
 
         return redirect('home')
     
-    context = {}
+    context = {'is_owner': is_owner}
     return render(request, 'createFamily.html', context)
 
 
@@ -263,6 +293,11 @@ def createFamily(request):
 def manageFamilyMembers(request, family_id):
     family = get_object_or_404(models.Family, family_id=family_id)
     
+    #check if the current user is the owner of the family
+    if family.owner == request.user:
+        is_owner = True
+    else:
+        is_owner = False
     # Only allow the family owner to manage members.
     if family.owner != request.user:
         return HttpResponseForbidden("You do not have permission to manage this family.")
@@ -323,6 +358,7 @@ def manageFamilyMembers(request, family_id):
         "current_members": current_members,
         "available_users": available_users,
         "default_limit_ratio": default_limit_ratio,
+        "is_owner": is_owner,
     }
     return render(request, "manageFamilyMembers.html", context)
 
@@ -330,11 +366,18 @@ def manageFamilyMembers(request, family_id):
 
 @login_required(login_url='heroPage')
 def my_families(request):
+    family = request.user.family_set.first()
+    #check if the current user is the owner of the family
+    if family.owner == request.user:
+        is_owner = True
+    else:
+        is_owner = False
     # Retrieve all Family instances where the current user is a member using the static method.
     families = models.FamilyTag.get_all_families_by_user(request.user)
     
     context = {
-        'families': families
+        'families': families,
+        'is_owner': is_owner,
     }
     return render(request, 'my_families.html', context)
 
