@@ -75,13 +75,10 @@ def fridgePage(request, family_id):
     compartments = models.CompartmentsDetails.objects.filter(family_id=family)
     fridge = FridgeDetail.objects.filter(family_id=family).first()  # returns None if missing
 
-    families = models.Family.objects.filter(FamilyTag__user=request.user)
-    # Check if the user is the owner of any family
-    is_owner = False
-    for family in families:
-        if family.owner == request.user:
-            is_owner = True
-            break
+    if family.owner == request.user:
+        is_owner = True
+    else:
+        is_owner = False
 
     #Compute expirations and usage
     today = date.today()
