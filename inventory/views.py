@@ -75,6 +75,12 @@ def fridgePage(request, family_id):
     compartments = models.CompartmentsDetails.objects.filter(family_id=family)
     fridge = FridgeDetail.objects.filter(family_id=family).first()  # returns None if missing
 
+    #check if the current user is the owner of the family
+    if family.owner == request.user:
+        is_owner = True
+    else:
+        is_owner = False
+
     #Compute expirations and usage
     today = date.today()
     expiring_items = FridgeContent.objects.filter(
@@ -87,7 +93,8 @@ def fridgePage(request, family_id):
         expiration_date__lt=today
     )
     
-    usage_percent = (family.occupied_volume / family.total_volume * 100) if fridge else 0
+    #calculates usage percent
+    usage_percent = family.usage_percent
 
     #All fridge contents
     item_list = FridgeContent.objects.filter(family_id=family)
@@ -99,15 +106,11 @@ def fridgePage(request, family_id):
     else:
         limit_fraction = 1
 
-    # Get all user's fridge items
-    user_items = FridgeContent.objects.filter(user=request.user)
+    
+    
 
     #Calculate user usage percent
-    user_volume = 0
-    for item in user_items:
-        user_volume += item.item_length * item.item_width * item.item_height * item.quantity
-
-    user_percent = (user_volume / family.total_volume * 100) if fridge else 0
+    user_percent = tag.calculate_user_percent()
 
     return render(request, "fridgePage.html", {
         "family":         family,
@@ -122,6 +125,7 @@ def fridgePage(request, family_id):
         "limit_fraction": limit_fraction*100,
         "user_limit_space": limit_fraction*family.total_volume, 
         "user_percent":   user_percent,
+        "is_owner":       is_owner,
     })
   
 @login_required(login_url='heroPage')
