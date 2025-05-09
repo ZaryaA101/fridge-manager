@@ -159,13 +159,33 @@ def update_item(request, item_id):
             occupied_volume = family.occupied_volume
             usage_percent = (occupied_volume / total_volume * 100) if total_volume > 0 else 0
 
+            # Calculate user-space usage
+            try:
+                tag = FamilyTag.objects.get(user=request.user, family=family)
+                if tag.limit_ratio and request.user != family.owner:
+                    limit_fraction = tag.limit_ratio
+                else:
+                    limit_fraction = 1  
+                user_limit_space = total_volume * limit_fraction
+                user_occupied_volume = sum(
+                    ci.item_length * ci.item_width * ci.item_height * ci.quantity
+                    for ci in FridgeContent.items_added_by(request.user, family)
+                )
+                user_percent = (user_occupied_volume / user_limit_space * 100) if user_limit_space > 0 else 0
+            except FamilyTag.DoesNotExist:
+                user_limit_space = total_volume
+                user_percent = (occupied_volume / total_volume * 100) if total_volume > 0 else 0
+
+
             return JsonResponse({
                 'success': True,
                 'new_count': fridge_item.quantity,
                 'occupied': compartment.occupied,  
                 'usage_ratio': usage_ratio,
                 'total_volume': total_volume,
-                'usage_percent': usage_percent
+                'usage_percent': usage_percent,
+                'user_percent': user_percent,
+                'user_limit_space': user_limit_space
             })
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
