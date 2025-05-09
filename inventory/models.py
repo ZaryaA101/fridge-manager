@@ -77,6 +77,24 @@ class Family(models.Model):
             occupied += item_vol
         return occupied
     
+    @property
+    def usage_percent(self):
+        """
+        Calculates the percentage of the fridge's total volume that is currently occupied.
+        """
+        total_volume = self.total_volume
+        occupied_volume = self.occupied_volume
+        return (occupied_volume / total_volume * 100) if total_volume > 0 else 0
+    
+    def total_items_volume(self):
+        """
+        Calculates the total volume of all items inside the fridge.
+        """
+        total_items_volume = Decimal("0")
+        for content in self.FridgeContent.all():
+            item_vol = content.item_length * content.item_width * content.item_height * content.quantity
+            total_items_volume += item_vol
+        return total_items_volume
     
     
 
@@ -119,6 +137,7 @@ class CompartmentsDetails(models.Model):
         for content in self.FridgeContent.all():
             item_vol = content.item_length * content.item_width * content.item_height * content.quantity
             occupied += item_vol
+        print(f"Occupied volume in {self.compartment_name}: {occupied}")
         return occupied
     
     @property
@@ -132,6 +151,15 @@ class CompartmentsDetails(models.Model):
     def total_vol(self):
         return self.compartment_height * self.compartment_length * self.compartment_width
         
+    def total_items_volume(self):
+        """
+        Calculates the total volume of all items inside this compartment.
+        """
+        total_items_volume = Decimal("0")
+        for content in self.FridgeContent.all():
+            item_vol = content.item_length * content.item_width * content.item_height * content.quantity
+            total_items_volume += item_vol
+        return total_items_volume
     
     def __str__(self): 
         return f"{self.compartment_name}"
@@ -146,7 +174,28 @@ class FamilyTag(models.Model):
         verbose_name = "Family Member"
         verbose_name_plural = "Family Members"
         unique_together = ("family", "user")
-        
+
+    def calculate_user_percent(self):
+        """
+        Calculate the percentage of the fridge's total volume occupied by this user's items.
+        """
+        user_items = FridgeContent.objects.filter(user=self.user, family_id=self.family)
+        user_volume = sum(
+            item.item_length * item.item_width * item.item_height * item.quantity
+            for item in user_items
+        )
+        total_volume = self.family.total_volume
+        return (user_volume / total_volume * 100) if total_volume > 0 else 0
+
+    def calculate_user_limit_space(self):
+        """
+        Calculate the user's allowed space in the fridge based on their limit ratio.
+        """
+        if self.family.owner == self.user:
+            # No limit for the family owner
+            return self.family.total_volume
+        return self.family.total_volume * self.limit_ratio
+    
     @staticmethod
     def get_all_families_by_user(user):
         return Family.objects.filter(FamilyTag__user=user)
@@ -177,6 +226,7 @@ class FridgeContent(models.Model):
             return self.expiration_date <= timezone.now().date() + datetime.timedelta(days=4)
         return False
 
+    
     
     @property
     def volume(self):
@@ -241,3 +291,4 @@ class UserProfile(models.Model):
 #         UserProfile.objects.create(user=instance)
 #     else:
 #         instance.profile.save()
+
