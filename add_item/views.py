@@ -101,7 +101,7 @@ def add_item(request, family_id):
                         f"({compartment_occupied + new_vol} of {compartment_vol})."
                     )
                     return render(request, 'addItem.html',{'form': form})
-                
+
             #passed the limit check, now save and redirect
             
             fridge_item.save()
@@ -157,24 +157,10 @@ def update_item(request, item_id):
             family = get_object_or_404(Family, pk=family_id)
             total_volume = family.total_volume
             occupied_volume = family.occupied_volume
-            usage_percent = (occupied_volume / total_volume * 100) if total_volume > 0 else 0
-
-            # Calculate user-space usage
-            try:
-                tag = FamilyTag.objects.get(user=request.user, family=family)
-                if tag.limit_ratio and request.user != family.owner:
-                    limit_fraction = tag.limit_ratio
-                else:
-                    limit_fraction = 1  
-                user_limit_space = total_volume * limit_fraction
-                user_occupied_volume = sum(
-                    ci.item_length * ci.item_width * ci.item_height * ci.quantity
-                    for ci in FridgeContent.items_added_by(request.user, family)
-                )
-                user_percent = (user_occupied_volume / user_limit_space * 100) if user_limit_space > 0 else 0
-            except FamilyTag.DoesNotExist:
-                user_limit_space = total_volume
-                user_percent = (occupied_volume / total_volume * 100) if total_volume > 0 else 0
+            usage_percent = family.usage_percent
+            family_tag = FamilyTag.objects.get(user=request.user, family=family)
+            user_percent = family_tag.calculate_user_percent()
+            user_limit_space = family_tag.calculate_user_limit_space()
 
 
             return JsonResponse({
@@ -210,30 +196,25 @@ def remove_item(request, item_id):
                 family_id=family_id,
                 compartment_id=compartment_id
             )
+
             fridge_item.delete()
 
             # Calculate updated fridge usage
             family = get_object_or_404(Family, pk=family_id)
             total_volume = family.total_volume
-            occupied_volume = family.occupied_volume- (fridge_item.item_length * fridge_item.item_width * fridge_item.item_height * fridge_item.quantity)
-            usage_percent = (occupied_volume / total_volume * 100) if total_volume > 0 else 0
+            compartment = CompartmentsDetails.objects.get(compartment_id=compartment_id)
+            occupied_volume = compartment.occupied
+            usage_percent = family.usage_percent
 
             # Calculate user-space usage
             try:
                 tag = FamilyTag.objects.get(user=request.user, family=family)
-                if tag.limit_ratio and request.user != family.owner:
-                    limit_fraction = tag.limit_ratio
-                else:
-                    limit_fraction = 1  
-                user_limit_space = total_volume * limit_fraction
-                user_occupied_volume = sum(
-                    ci.item_length * ci.item_width * ci.item_height * ci.quantity
-                    for ci in FridgeContent.items_added_by(request.user, family)
-                )
-                user_percent = (user_occupied_volume / user_limit_space * 100) if user_limit_space > 0 else 0
+                user_limit_space = tag.calculate_user_limit_space()
+                
+                user_percent = tag.calculate_user_percent()
             except FamilyTag.DoesNotExist:
-                user_limit_space = total_volume
-                user_percent = (occupied_volume / total_volume * 100) if total_volume > 0 else 0
+                user_limit_space = tag.calculate_user_limit_space()
+                user_percent = tag.calculate_user_percent()
             return JsonResponse({
                 'success': True,
                 'message': 'Item removed successfully.',
