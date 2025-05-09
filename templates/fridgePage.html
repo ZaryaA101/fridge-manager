@@ -338,6 +338,20 @@ function showItemDetails(imageElement) {
                 progressBar.setAttribute('aria-valuenow', usagePercent);
                 progressBar.textContent = `${usagePercent.toFixed(0)}% Full`;
             }
+
+          
+
+          // Update the user_usage text
+          const userUsageDiv = document.getElementById('user-usage');
+          if (userUsageDiv) {
+            const userPercent = parseFloat(data.user_percent) || 0;
+            const userLimitSpace = parseFloat(data.user_limit_space) || 0;
+            userUsageDiv.innerHTML = `You are currently using ${userPercent.toFixed(0)}% of your ${userLimitSpace.toFixed(0)} in<sup>3</sup> limit.`;
+          }
+
+
+
+
           
             // Close the edit popup and return to the details view
             hideItemDetails();
@@ -424,6 +438,14 @@ document.addEventListener('DOMContentLoaded', function () {
                       progressBar.setAttribute('aria-valuenow', usagePercent);
                       progressBar.textContent = `${usagePercent.toFixed(0)}% Full`;
                   } 
+
+                  // Update the user_usage text
+                  const userUsageDiv = document.getElementById('user-usage');
+                  if (userUsageDiv) {
+                      const userPercent = parseFloat(data.user_percent) || 0;
+                      const userLimitSpace = parseFloat(data.user_limit_space) || 0;
+                      userUsageDiv.innerHTML = `You are currently using ${userPercent.toFixed(0)}% of your ${userLimitSpace.toFixed(0)} in<sup>3</sup> limit.`;
+                  }
                   // Close the item details popup and confirmation modal
                   hideItemDetails();
                   const removeItemModal = bootstrap.Modal.getInstance(document.getElementById('removeItemModal'));
@@ -581,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
 {% endif %}
 
-<div style="font-size: 17px;">You are currently using {{ user_percent|floatformat:0 }}% of your {{ user_limit_space|floatformat:0 }} in<sup>3</sup> limit.</div>
+<div id="user-usage" style="font-size: 17px;">You are currently using {{ user_percent|floatformat:0 }}% of your {{ user_limit_space|floatformat:0 }} in<sup>3</sup> limit.</div>
 <button type="button" 
   style="margin-top:5px"
   class="btn btn-primary"
