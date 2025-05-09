@@ -79,8 +79,14 @@ def fridgePage(request, family_id):
     today = date.today()
     expiring_items = FridgeContent.objects.filter(
         family_id=family,
-        expiration_date__lte=today + datetime.timedelta(days=4)
+        expiration_date__lte=today + datetime.timedelta(days=4),
+        expiration_date__gte=today
     )
+    expired_items = FridgeContent.objects.filter(
+        family_id=family,
+        expiration_date__lt=today
+    )
+    
     usage_percent = (family.occupied_volume / family.total_volume * 100) if fridge else 0
 
     #All fridge contents
@@ -109,6 +115,7 @@ def fridgePage(request, family_id):
         "compartments":   compartments,
         "fridge":         fridge,
         "expiring_items": expiring_items,
+        "expired_items":  expired_items,
         "usage_percent":  usage_percent,
         "today":          today,
         "item_list":      item_list,
