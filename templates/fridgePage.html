@@ -587,6 +587,13 @@ document.addEventListener('DOMContentLoaded', function () {
      The item <strong>{{ item.item_id.item_name }}</strong> is expiring on {{ item.expiration_date }}.
   </div>
 {% endfor %}
+  {% for item in expired_items %}
+  <div class="alert alert-danger">
+     The item <strong>{{ item.item_id.item_name }}</strong> has expired on {{ item.expiration_date }}.
+  </div>
+  {% endfor %}
+</div>
+
 <div class="progress">
   <div class="progress-bar bg-info" role="progressbar" style="width: {{ usage_percent }}%;" aria-valuenow="{{ usage_percent }}" aria-valuemin="0" aria-valuemax="100">
     {{ usage_percent|floatformat:0 }}% Full
