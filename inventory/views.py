@@ -131,16 +131,17 @@ def fridgePage(request, family_id):
 @login_required(login_url='heroPage')
 def home(request):
 
-    family = request.user.family_set.first()
-    #check if the current user is the owner of the family
-    if family.owner == request.user:
-        is_owner = True
-    else:
-        is_owner = False
+   
     
     families = models.Family.objects.filter(FamilyTag__user=request.user)
     family_users = models.FamilyTag.objects.filter(family_id__in=families)
     
+    # Check if the user is the owner of any family
+    is_owner = False
+    for family in families:
+        if family.owner == request.user:
+            is_owner = True
+            break
     context = {
         "family_users": family_users,
         "families": families,
@@ -192,12 +193,13 @@ def profilePage(request):
 
 @login_required(login_url='heroPage')
 def createFamily(request):
-    family = request.user.family_set.first()
-    #check if the current user is the owner of the family
-    if family.owner == request.user:
-        is_owner = True
-    else:
-        is_owner = False
+    families = models.Family.objects.filter(FamilyTag__user=request.user)
+    # Check if the user is the owner of any family
+    is_owner = False
+    for family in families:
+        if family.owner == request.user:
+            is_owner = True
+            break
     if request.method == 'POST':
         family_name = request.POST.get('family_name', '').strip()
 
@@ -432,6 +434,10 @@ def manage_fridge_details(request, family_id):
         "error": error
     }
     return render(request, "manage_fridge_details.html", context)
+
+
+
+
 
 
 
