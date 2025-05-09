@@ -291,4 +291,3 @@ class UserProfile(models.Model):
 #         UserProfile.objects.create(user=instance)
 #     else:
 #         instance.profile.save()
-
