@@ -1,4 +1,4 @@
-<div
+div
   class="d-flex d-flex align-items-center flex-column flex-shrink-0 bg-light vh-100"
   style="width: 100%"
 >
@@ -11,6 +11,7 @@
   <span class="fs-4 fw-bold">Manager</span>
 </a>
   <hr />
+  {% if is_owner %}
   <div class="mb-4">
     <button id="addItemButton" 
       class="btn btn-outline-primary btn-lg" 
@@ -30,6 +31,7 @@
         Unregister Item
     </button>
   </div>
+  {% endif %}
   
   <ul class="nav nav-pills flex-column mb-auto">
     <li class="nav-item">
