@@ -600,7 +600,11 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
 </div>
 
-{% if usage_percent > 90 %}
+{% if usage_percent > 98 %}
+  <div class="alert alert-danger" role="alert">
+      Warning: Your fridge is full, Please remove an item to make space ({{ usage_percent|floatformat:0 }}% used)!
+  </div>
+{% elif usage_percent > 90 %}
   <div class="alert alert-danger" role="alert">
       Warning: Your fridge is almost full ({{ usage_percent|floatformat:0 }}% used)!
   </div>
