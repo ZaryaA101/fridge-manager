@@ -215,7 +215,7 @@ def remove_item(request, item_id):
             # Calculate updated fridge usage
             family = get_object_or_404(Family, pk=family_id)
             total_volume = family.total_volume
-            occupied_volume = family.occupied_volume
+            occupied_volume = family.occupied_volume- (fridge_item.item_length * fridge_item.item_width * fridge_item.item_height * fridge_item.quantity)
             usage_percent = (occupied_volume / total_volume * 100) if total_volume > 0 else 0
 
             # Calculate user-space usage
