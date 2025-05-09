@@ -75,11 +75,13 @@ def fridgePage(request, family_id):
     compartments = models.CompartmentsDetails.objects.filter(family_id=family)
     fridge = FridgeDetail.objects.filter(family_id=family).first()  # returns None if missing
 
-    #check if the current user is the owner of the family
-    if family.owner == request.user:
-        is_owner = True
-    else:
-        is_owner = False
+    families = models.Family.objects.filter(FamilyTag__user=request.user)
+    # Check if the user is the owner of any family
+    is_owner = False
+    for family in families:
+        if family.owner == request.user:
+            is_owner = True
+            break
 
     #Compute expirations and usage
     today = date.today()
@@ -153,12 +155,13 @@ def home(request):
 
 @login_required(login_url='heroPage')
 def addFridge(request):
-    family = request.user.family_set.first()
-    #check if the current user is the owner of the family
-    if family.owner == request.user:
-        is_owner = True
-    else:
-        is_owner = False
+    families = models.Family.objects.filter(FamilyTag__user=request.user)
+    # Check if the user is the owner of any family
+    is_owner = False
+    for family in families:
+        if family.owner == request.user:
+            is_owner = True
+            break
     fridge_list=1
     context = {
         "fridge_list": fridge_list,
@@ -170,12 +173,13 @@ def addFridge(request):
 @login_required(login_url='heroPage')
 def profilePage(request):
     user = request.user 
-    family = user.family_set.first()
-    #check if the current user is the owner of the family
-    if family.owner == request.user:
-        is_owner = True
-    else:
-        is_owner = False
+    families = models.Family.objects.filter(FamilyTag__user=request.user)
+    # Check if the user is the owner of any family
+    is_owner = False
+    for family in families:
+        if family.owner == request.user:
+            is_owner = True
+            break
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
@@ -293,13 +297,13 @@ def createFamily(request):
 
 @login_required(login_url='heroPage')
 def manageFamilyMembers(request, family_id):
-    family = get_object_or_404(models.Family, family_id=family_id)
-    
-    #check if the current user is the owner of the family
-    if family.owner == request.user:
-        is_owner = True
-    else:
-        is_owner = False
+    families = models.Family.objects.filter(FamilyTag__user=request.user)
+    # Check if the user is the owner of any family
+    is_owner = False
+    for family in families:
+        if family.owner == request.user:
+            is_owner = True
+            break
     # Only allow the family owner to manage members.
     if family.owner != request.user:
         return HttpResponseForbidden("You do not have permission to manage this family.")
@@ -368,12 +372,13 @@ def manageFamilyMembers(request, family_id):
 
 @login_required(login_url='heroPage')
 def my_families(request):
-    family = request.user.family_set.first()
-    #check if the current user is the owner of the family
-    if family.owner == request.user:
-        is_owner = True
-    else:
-        is_owner = False
+    families = models.Family.objects.filter(FamilyTag__user=request.user)
+    # Check if the user is the owner of any family
+    is_owner = False
+    for family in families:
+        if family.owner == request.user:
+            is_owner = True
+            break
     # Retrieve all Family instances where the current user is a member using the static method.
     families = models.FamilyTag.get_all_families_by_user(request.user)
     
@@ -388,6 +393,13 @@ def my_families(request):
 def manage_fridge_details(request, family_id):
     family = get_object_or_404(models.Family, family_id=family_id)
     
+    families = models.Family.objects.filter(FamilyTag__user=request.user)
+    # Check if the user is the owner of any family
+    is_owner = False
+    for family in families:
+        if family.owner == request.user:
+            is_owner = True
+            break
     # Only allow the owner to manage fridge details.
     if family.owner != request.user:
         return HttpResponseForbidden("You do not have permission to manage this family's fridge details.")
@@ -431,9 +443,14 @@ def manage_fridge_details(request, family_id):
     context = {
         "family": family,
         "fridge_details": fridge_details,
-        "error": error
+        "error": error,
+        "is_owner": is_owner,
     }
     return render(request, "manage_fridge_details.html", context)
+
+
+
+
 
 
 
