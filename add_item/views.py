@@ -101,6 +101,7 @@ def add_item(request, family_id):
                         f"({compartment_occupied + new_vol} of {compartment_vol})."
                     )
                     return render(request, 'addItem.html',{'form': form})
+                
 
             #passed the limit check, now save and redirect
             
@@ -161,7 +162,6 @@ def update_item(request, item_id):
             family_tag = FamilyTag.objects.get(user=request.user, family=family)
             user_percent = family_tag.calculate_user_percent()
             user_limit_space = family_tag.calculate_user_limit_space()
-
 
             return JsonResponse({
                 'success': True,
@@ -228,5 +228,7 @@ def remove_item(request, item_id):
             return JsonResponse({'success': False, 'error': 'Item not found in the specified fridge and compartment.'}, status=404)
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=400)
+
+
 
 
