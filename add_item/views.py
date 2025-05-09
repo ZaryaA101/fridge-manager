@@ -82,38 +82,38 @@ def add_item(request, family_id):
                         ci.item_height
                     )
                 
-                total_volume = family.total_volume
-
-                #if they’d exceed their allowed fraction, error out
-                if (existing_vol + new_vol) > (total_volume * Decimal(limit_fraction)):
-                    form.add_error(
-                        None,
-                        "Adding this item would exceed your allotted capacity "
-                        f"({limit_fraction*100:.0f}% of {total_volume})."
-                    )
-                    return render(request, 'addItem.html',{'form': form, 'is_owner': is_owner})
-
-                
-            #check compartment limit
-            compartment = fridge_item.compartment_id
-            compartment_vol = (compartment.compartment_length * 
-                               compartment.compartment_width * 
-                               compartment.compartment_height )
             
-            compartment_occupied = Decimal('0')
-            for ci in FridgeContent.items_added_in(compartment, family):
-                    compartment_occupied += (
-                        ci.item_length *
-                        ci.item_width  *
-                        ci.item_height
-                    )
-            if (compartment_occupied + new_vol) > compartment_vol:
-                    form.add_error(
-                        None,
-                        f"Adding this item would exceed the {compartment.compartment_name}'s capacity "
-                        f"({compartment_occupied + new_vol} of {compartment_vol})."
-                    )
-                    return render(request, 'addItem.html',{'form': form, 'is_owner': is_owner})
+            item_add_value = (
+                fridge_item.item_length *
+                fridge_item.item_width *
+                fridge_item.item_height *
+                fridge_item.quantity
+            )
+
+            current_items_in_compartment = sum(
+                item.item_length * item.item_width * item.item_height * item.quantity
+                for item in FridgeContent.objects.filter(
+                    family_id=family,
+                    compartment_id=fridge_item.compartment_id
+                )
+            )
+            
+            compartment_size = (
+                fridge_item.compartment_id.compartment_length *
+                fridge_item.compartment_id.compartment_width *
+                fridge_item.compartment_id.compartment_height
+                )
+
+            
+            # Check compartment capacity
+            if item_add_value + current_items_in_compartment > compartment_size:
+                form.add_error(
+                    None,
+                    f"Adding this item would exceed the total capacity of the fridge '{family.family_name}'."
+                )
+                
+                return render(request, 'addItem.html', {'form': form, 'is_owner': is_owner})
+                
                 
 
             #passed the limit check, now save and redirect
