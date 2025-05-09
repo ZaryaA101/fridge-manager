@@ -10,7 +10,16 @@ from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal
 
 def add_item(request, family_id):
+    
+    
     family = get_object_or_404(Family, pk=family_id)
+    # Check if the user is the owner of any family
+    if family.owner == request.user:
+            is_owner = True
+    else:
+            is_owner = False
+        
+            
 
     if request.method == "POST":
         form = FridgeContentForm(request.POST, family=family)
@@ -22,6 +31,10 @@ def add_item(request, family_id):
             fridge_item.compartment_id = form.cleaned_data['compartment_id']
             item = form.cleaned_data['item_id']
 
+
+            
+
+
             # Check if the item already exists in the compartment
             existing_item = FridgeContent.objects.filter(
                 family_id=family,
@@ -31,7 +44,7 @@ def add_item(request, family_id):
 
             if existing_item:
                 messages.error(request, f"The item '{item.item_name}' already exists in the compartment '{fridge_item.compartment_id.compartment_name}'.")
-                return render(request, 'addItem.html', {'form': form})
+                return render(request, 'addItem.html', {'form': form, 'is_owner': is_owner})
 
             #check here to see if item is actually having a volume
             item: ItemsDetails = form.cleaned_data['item_id']
@@ -78,7 +91,7 @@ def add_item(request, family_id):
                         "Adding this item would exceed your allotted capacity "
                         f"({limit_fraction*100:.0f}% of {total_volume})."
                     )
-                    return render(request, 'addItem.html',{'form': form})
+                    return render(request, 'addItem.html',{'form': form, 'is_owner': is_owner})
 
                 
             #check compartment limit
@@ -100,7 +113,7 @@ def add_item(request, family_id):
                         f"Adding this item would exceed the {compartment.compartment_name}'s capacity "
                         f"({compartment_occupied + new_vol} of {compartment_vol})."
                     )
-                    return render(request, 'addItem.html',{'form': form})
+                    return render(request, 'addItem.html',{'form': form, 'is_owner': is_owner})
                 
 
             #passed the limit check, now save and redirect
@@ -111,7 +124,7 @@ def add_item(request, family_id):
     else:
         form = FridgeContentForm(family=family)
 
-    return render(request,'addItem.html',{'form': form})
+    return render(request,'addItem.html',{'form': form, is_owner: is_owner})
 
 @csrf_exempt
 def update_item(request, item_id):
